@@ -1207,7 +1207,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 			$this->failJson("Unable to Transfer", "You must specifiy a queue");
 		$this->updateTicket(['ticket_id' => $id,
 							 'internal' => true,
-							 'ticket_body' => "<h4>Ticket Escalated to $name",
+							 'ticket_body' => "<h4>Ticket Escalated to $name</h4>",
 							 'ticket_status' => "Queue Transferred"
 				]);
 		$this->query("UPDATE tickets SET queue_id='$content[new_q]' WHERE id='$id'");
