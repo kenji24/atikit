@@ -1214,7 +1214,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json = [];
 		$json['action'] = 'reload';
 		$json['url'] = '/';
-		$this->json('success', $json);
+		$this->jsone('success', $json);
 	}
 
 } // class
