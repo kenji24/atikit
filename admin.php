@@ -34,7 +34,7 @@ class admin extends core
 		$data .= base::crumbs([['url' => '#', 'text' => 'Admin']]);
 		$this->export($data);
 	}
-	
+
 	private function adminNav($active)
 	{
 		$opt[$active] = "class='active'";
@@ -45,7 +45,7 @@ class admin extends core
 								<li class='nav-header'>Administrative Options</li>
 								<li $opt[billing]><a href='/admin/billing/'><i class='icon-money icon-white'></i> Billing</a></li>
 								<li $opt[stripe]><a href='/admin/stripe/'><i class='icon-credit-card icon-white'></i> Stripe Configuration</a></li>
-								<li $opt[levels]><a href='/admin/levels/'><i class='icon-lock'></i> Access Levels</a></li>				
+								<li $opt[levels]><a href='/admin/levels/'><i class='icon-lock'></i> Access Levels</a></li>
 								<li $opt[users]><a href='/admin/users/'><i class='icon-user'></i> aTikit Users</a></li>
 								<li $opt[queues]><a href='/admin/queues/'><i class='icon-upload-alt'></i> Queues</a></li>
 								<li $opt[settings]><a href='/admin/settings/'><i class='icon-wrench'></i> General Settings</a></li>
@@ -56,24 +56,24 @@ class admin extends core
 					</div>";
 		return $data;
 	}
-	
+
 	public function main()
 	{
 		$this->showTransactionLog();
-	}	
-	
+	}
+
 	// --------------------------------------------------------------------------------------------------------
 	// 			Access Levels
 	// --------------------------------------------------------------------------------------------------------
-	
+
 	private function getNumberAssignedToLevel($lid)
 	{
 		return $this->returnCountFromTable("users", "level_id='$lid'");
 	}
-	
+
 	private function addLevelForm()
 	{
-		$pre = "<p>You are about to add an access level. Access levels are used to limit or extend access to various parts of the system. Be careful when choosing options and assigning 
+		$pre = "<p>You are about to add an access level. Access levels are used to limit or extend access to various parts of the system. Be careful when choosing options and assigning
 				access levels. If your account is an administrator this will not effect you.</p>
 				<p>Once you have created an access level you will be able to assign users and queues to those levels.</p>";
 		$fields = [];
@@ -83,14 +83,14 @@ class admin extends core
 		$fields[] = ['type' => 'checkbox', 'var' => 'level_isbilling', 'opts' => $opts];
 		$form = form::init()->id('createLevel')->post('/admin/')->elements($fields)->legend('Access Paremeters')->render();
 		return $pre.$form;
-		
+
 	}
 
 	private function levelHasBilling($level)
 	{
 		if ($level['level_isbilling']) return "Yes";
 		else return "No";
-		
+
 	}
 	public function levels()
 	{
@@ -99,13 +99,13 @@ class admin extends core
 		$headers = ['Level Name', 'Users Assigned', 'Billing Enabled', 'Delete'];
 		$rows = [];
 		foreach ($levels AS $level)
-			$rows[] = ["<a class='mjax' data-target='#editLevel' href='/admin/level/$level[id]/'>$level[level_name]</a>", 
+			$rows[] = ["<a class='mjax' data-target='#editLevel' href='/admin/level/$level[id]/'>$level[level_name]</a>",
 			$this->getNumberAssignedToLevel($level['id']),
-			$this->levelHasBilling($level), 
+			$this->levelHasBilling($level),
 					"<a class='get' href='/admin/level/delete/$level[id]/'><i class='icon-remove'></i></a>"];
-			
+
 		$table = table::init()->headers($headers)->rows($rows)->render();
-		$addButton = button::init()->addStyle('btn-primary')->isModalLauncher()->url('#addLevel')->text('Add Access Level')->render();		
+		$addButton = button::init()->addStyle('btn-primary')->isModalLauncher()->url('#addLevel')->text('Add Access Level')->render();
 		$widget = widget::init()->span(8)->header("Access Levels")->content($table)->isTable()->icon('key')->rightHeader($addButton)->render();
 		$this->export(base::row($nav.$widget, true));
 		$saveButton = button::init()->addStyle('btn-primary')->addStyle('mpost')->text('Create')->postVar('createLevel')->message('Creating Level..')->render();
@@ -113,7 +113,7 @@ class admin extends core
 		$editModal = modal::init()->onlyConstruct()->id('editLevel')->render();
 		$this->exportModal($addModal.$editModal);
 	}
-	
+
 	public function createLevel($content)
 	{
 		if (!$content['level_name'])
@@ -139,7 +139,7 @@ class admin extends core
 		$fields[] = ['type' => 'input', 'text' => 'Access Level Name:', 'var' => 'level_name', 'val' => $level['level_name']];
 		$opts = [];
 		$checked = ($level['level_isbilling']) ? true : false;
-		
+
 		$opts[] = ['val' => 'Y', 'text' => 'Enable Billing Management', 'checked' => $checked];
 		$fields[] = ['type' => 'checkbox', 'var' => 'level_isbilling', 'opts' => $opts];
 		$pre = "<p>You will only be able to change the name of the access level here. If you wish to delete the level you must remove all users from the access level first.</p>";
@@ -148,7 +148,7 @@ class admin extends core
 		$this->ajax = true;
 		print modal::init()->isInline()->header("Edit $level[level_name]")->content($pre.$form)->footer($saveButton)->render();
 	}
-	
+
 	public function editLevel($content)
 	{
 		if (!$content['level_name'])
@@ -162,7 +162,7 @@ class admin extends core
 		$json['url'] = '/admin/levels/';
 		$this->jsonE('success', $json);
 	}
-	
+
 	public function deleteLevel($content)
 	{
 		$id = $content['deleteLevel'];
@@ -176,9 +176,9 @@ class admin extends core
 		$json['action'] = 'reload';
 		$json['url'] = '/admin/levels/';
 		$this->jsonE('success', $json);
-		
+
 	}
-	
+
 	// --------------------------------------------------------------------------------------------------------
 	// 			Users
 	// --------------------------------------------------------------------------------------------------------
@@ -189,8 +189,8 @@ class admin extends core
 		{
 			$opts[] = ['val' => $user['level_id'], 'text' => $this->getLevelById($user['level_id'])];
 			$opts[] = ['val' => $user['level_id'], 'text' => '---------------'];
-				
-			
+
+
 		}
 		$levels = $this->query("SELECT * from levels order by level_name ASC");
 		foreach ($levels as $level)
@@ -215,10 +215,10 @@ class admin extends core
 		$span[] = ['span' => 6, 'elements' => $fields];
 		$form = form::init()->id('createUser')->post('/admin/')->spanelements($span)->legend('User Paremeters')->render();
 		return $pre.$form;
-	
+
 	}
-	
-	
+
+
 	public function users()
 	{
 		$nav = base::span(4, $this->adminNav('users'));
@@ -232,7 +232,7 @@ class admin extends core
 			$user['user_email'],
 			$this->getLevelById($user['level_id']),
 			"<a class='get' href='/admin/user/delete/$user[id]/'><i class='icon-remove'></i></a>"];
-				
+
 			$table = table::init()->headers($headers)->rows($rows)->render();
 			$addButton = button::init()->addStyle('btn-primary')->isModalLauncher()->url('#addUser')->text('Add User')->render();
 					$widget = widget::init()->span(8)->header("Provider Users")->content($table)->isTable()->icon('key')->rightHeader($addButton)->render();
@@ -243,7 +243,7 @@ class admin extends core
 			$this->exportModal($addModal.$editModal);
 		}
 
-		
+
 		public function createUser($content)
 		{
 			if (!$content['user_name'] || !$content['user_password'] || !$content['user_title'])
@@ -262,7 +262,7 @@ class admin extends core
 			$json['url'] = '/admin/users/';
 			$this->jsonE('success', $json);
 		}
-		
+
 		public function editUserForm($content)
 		{
 			$user = $this->query("SELECT * from users WHERE id='$content[editUser]'")[0];
@@ -278,18 +278,18 @@ class admin extends core
 			$fields[] = ['type' => 'select', 'opts' => $opts, 'text' => 'Access Level:', 'var' => 'level_id'];
 			$span[] = ['span' => 6, 'elements' => $fields];
 			$form = form::init()->id('editUserForm')->post('/admin/')->spanelements($span)->legend('User Paremeters')->render();
-			
+
 			$this->ajax = true;
 			$saveButton = button::init()->addStyle('btn-primary')->addStyle('mpost')->text('Edit User')->postVar('editUser')->id($user['id'])->message('Editing User..')->formid('editUserForm')->render();
 			print modal::init()->isInline()->header("Edit $user[user_name]")->content($form)->footer($saveButton)->render();
 		}
-		
+
 		public function editUser($content)
 		{
 			if (!$content['user_name'] || !$content['user_title'] || !$content['user_email'])
 				$this->failJson("Unable to Change", "A user must have a name, email and title.");
-			
-			$this->query("UPDATE users SET user_name='$content[user_name]', user_email='$content[user_email]', user_title='$content[user_title]', 
+
+			$this->query("UPDATE users SET user_name='$content[user_name]', user_email='$content[user_email]', user_title='$content[user_title]',
 					level_id='$content[level_id]' WHERE id='$content[editUser]'");
 			if ($content['user_password'])
 			{
@@ -303,7 +303,7 @@ class admin extends core
 			$json['url'] = '/admin/users/';
 			$this->jsonE('success', $json);
 		}
-		
+
 		public function deleteUser($content)
 		{
 			$id = $content['deleteUser'];
@@ -314,7 +314,7 @@ class admin extends core
 			$json['action'] = 'reload';
 			$json['url'] = '/admin/users/';
 			$this->jsonE('success', $json);
-		
+
 		}
 
 		// --------------------------------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ class admin extends core
 		// --------------------------------------------------------------------------------------------------------
 		private function getLevelsForQueue(&$queue)
 		{
-			
+
 			$levels = $this->query("SELECT * from levels WHERE id in ($queue[queue_levels])");
 			$ldata = [];
 			foreach ($levels AS $level)
@@ -337,7 +337,7 @@ class admin extends core
 			$span = [];
 			$fields = [];
 			$fields[] = ['type' => 'input', 'text' => 'Queue Name:', 'var' => 'queue_name'];
-			
+
 			$fields[] = ['type' => 'input', 'text' => 'E-mail Address:', 'var' => 'queue_email', 'bottom' => 'ex. myqueue@mydomain.com'];
 			$fields[] = ['type' => 'input', 'text' => 'Hostname:', 'var' => 'queue_host', 'bottom' => 'ex. mail.mydomain.com'];
 			$fields[] = ['type' => 'input', 'text' => 'Password:', 'var' => 'queue_password'];
@@ -347,8 +347,8 @@ class admin extends core
 			$fields[] = ['type' => 'checkbox', 'var' => 'queue_islocked', 'opts' => $opts];
 			$span[] = ['span' => 6, 'elements' => $fields];
 			$fields = [];
-			
-			// Show all levels as a checkbox. 
+
+			// Show all levels as a checkbox.
 			$levels = $this->query("SELECT * from levels ORDER by level_name ASC");
 			foreach ($levels AS $level)
 			{
@@ -356,11 +356,11 @@ class admin extends core
 				$opts[] = ['val' => $level['id'], 'text' => $level['level_name']];
 				$fields[] = ['type' => 'checkbox', 'var' => 'lev_' . $level['id'], 'opts' => $opts];
 			}
-			$span[] = ['span' => 6, 'elements' => $fields];			
+			$span[] = ['span' => 6, 'elements' => $fields];
 			$form = form::init()->id('addQueueForm')->spanElements($span)->post('/admin/')->render();
 			return $pre.$form;
 		}
-		
+
 		public function queues()
 		{
 			$nav = base::span(4, $this->adminNav('queues'));
@@ -373,7 +373,7 @@ class admin extends core
 				$this->getLevelsForQueue($queue),
 				$queue['queue_lastmessage'],
 				"<a class='get' href='/admin/queue/delete/$queue[id]/'><i class='icon-remove'></i></a>"];
-		
+
 			$table = table::init()->headers($headers)->rows($rows)->render();
 			$addButton = button::init()->addStyle('btn-primary')->isModalLauncher()->url('#addQueue')->text('Add Queue')->render();
 			$widget = widget::init()->span(8)->header("Queues in Use")->content($table)->isTable()->icon('key')->rightHeader($addButton)->render();
@@ -383,20 +383,20 @@ class admin extends core
 			$editModal = modal::init()->onlyConstruct()->id('editQueue')->render();
 			$this->exportModal($addModal.$editModal);
 		}
-		
+
 		public function createQueue($content)
 		{
 			if (!$content['queue_name'] || !$content['queue_email'] || !$content['queue_password'])
 				$this->failJson('Unable to create', 'You must fill in all fields and select access levels.');
-			
+
 			$ilevels = [];
 			foreach ($content AS $id => $val)
 				if (preg_match('/lev_/i', $id))
 					array_push($ilevels, $val);
-			
+
 			if (count($ilevels) == 0)
 				$this->failJson('Unable to Create', 'You must select at least one access level.');
-			
+
 			$ilevels = implode(",", $ilevels);
 			$this->query("INSERT into queues SET queue_name='$content[queue_name]', queue_host='$content[queue_host]', queue_email='$content[queue_email]',
 					queue_password='$content[queue_password]', queue_levels='$ilevels', queue_icon='$content[queue_icon]'");
@@ -405,7 +405,7 @@ class admin extends core
 			$json['url'] = '/admin/queues/';
 			$this->jsone('success', $json);
 		}
-		
+
 		public function editQueueForm($content)
 		{
 			$queue = $this->query("SELECT * from queues WHERE id='$content[editQueue]'")[0];
@@ -419,7 +419,7 @@ class admin extends core
 			$span[] = ['span' => 6, 'elements' => $fields];
 			$fields = [];
 			$alevels = explode(",", $queue['queue_levels']);
-			// Show all levels as a checkbox. 
+			// Show all levels as a checkbox.
 			$levels = $this->query("SELECT * from levels ORDER by level_name ASC");
 			foreach ($levels AS $level)
 			{
@@ -428,27 +428,27 @@ class admin extends core
 				$opts[] = ['val' => $level['id'], 'text' => $level['level_name'], 'checked' => $checked];
 				$fields[] = ['type' => 'checkbox', 'var' => 'lev_' . $level['id'], 'opts' => $opts];
 			}
-			$span[] = ['span' => 6, 'elements' => $fields];			
+			$span[] = ['span' => 6, 'elements' => $fields];
 			$form = form::init()->id('editQueueForm')->post('/admin/')->spanelements($span)->legend('Queue Options')->render();
-				
+
 			$this->ajax = true;
 			$saveButton = button::init()->addStyle('btn-primary')->addStyle('mpost')->text('Edit Queue')->postVar('editQueue')->id($queue['id'])->message('Editing Queue..')->formid('editQueueForm')->render();
 			print modal::init()->isInline()->header("Edit $queue[queue_name]")->content($form)->footer($saveButton)->render();
 		}
-		
+
 		public function editQueue($content)
 		{
 			if (!$content['queue_name'] || !$content['queue_email'] || !$content['queue_password'])
 				$this->failJson('Unable to save', 'You must fill in all fields and select access levels.');
-				
+
 			$ilevels = [];
 			foreach ($content AS $id => $val)
 				if (preg_match('/lev_/i', $id))
 				array_push($ilevels, $val);
-				
+
 			if (count($ilevels) == 0)
 				$this->failJson('Unable to save', 'You must select at least one access level.');
-				
+
 			$ilevels = implode(",", $ilevels);
 			$this->query("UPDATE queues SET queue_name='$content[queue_name]', queue_host='$content[queue_host]', queue_email='$content[queue_email]',
 					queue_password='$content[queue_password]', queue_levels='$ilevels', queue_icon='$content[queue_icon]' WHERE id='$content[editQueue]'");
@@ -456,7 +456,7 @@ class admin extends core
 			$json['action'] = 'reload';
 			$json['url'] = '/admin/queues/';
 			$this->jsone('success', $json);
-			
+
 		}
 		public function deleteQueue($content)
 		{
@@ -468,9 +468,9 @@ class admin extends core
 			$json['action'] = 'reload';
 			$json['url'] = '/admin/queues/';
 			$this->jsonE('success', $json);
-		
+
 		}
-		
+
 		// --------------------------------------------------------------------------------------------------------
 		// 			Settings (Keys, Etc)
 		// --------------------------------------------------------------------------------------------------------
@@ -487,16 +487,16 @@ class admin extends core
 				$fields = [];
 				foreach ($settings AS $setting)
 		    		$fields[] = ['type' => $setting['setting_type'], 'span' => $setting['setting_span'], 'text' => $setting['setting_desc'], 'comment' => $setting['setting_help'], 'val' => $setting['setting_val'], 'var' => 's_' . $setting['setting_var']];
-			
+
 				$form = form::init()->post('/admin/')->elements($fields)->id("form_$x")->render();
 				$button = button::init()->withGroup(false)->addStyle('btn-block')->addStyle('btn-inverse')->addStyle('post')->postVar('saveSettings')->text('Save Settings')->icon('ok-sign')->formid("form_$x")->render();
 				$class = ($x==1) ? 'active' : null;
-				$tabs[] = ['id' => "cat_$x", 'title' => $category['setting_cat'], 'class' => $class, 'content' => $form.$button];	
+				$tabs[] = ['id' => "cat_$x", 'title' => $category['setting_cat'], 'class' => $class, 'content' => $form.$button];
 			}
 			$widget = widget::init()->span(8)->icon('edit')->header('aTikit Settings')->isTabs($tabs)->render();
 			$this->export(base::row($nav.$widget, true));
 		}
-		
+
 		public function saveSettings($content)
 		{
 			foreach ($content AS $key=>$val)
@@ -507,17 +507,17 @@ class admin extends core
 			$json['gbody'] = "Settings have been saved";
 			$json['action'] = 'reassignsource';
 			$json['elementval'] = "Settings Saved";
-			$this->jsone('success', $json);			
+			$this->jsone('success', $json);
 		}
-		
+
 		private function getStripePlans()
 		{
-			// When this routine calls, be sure to go ahead and update our local db for any new plans or weirdness. 
+			// When this routine calls, be sure to go ahead and update our local db for any new plans or weirdness.
 			// Remember plan_id is from stripe.. need to match OUR id for the record count.
 			$plans = $this->stripe_getPlans();
 			$headers = ['ID', 'Plan Name', 'Price', 'Customers', 'Remove'];
 			$rows = [];
-			
+
 			foreach ($plans AS $plan)
 			{
 				$myPlan = $this->query("SELECT id from plans WHERE plan_id='$plan[id]'")[0];
@@ -531,7 +531,7 @@ class admin extends core
 							$plan['name'],
 							"$" . number_format($plan['amount'] / 100,2),
 							$count,
-							"<a class='get' href='/admin/billing/stripe/removeplan/$plan[id]/'><i class='icon-remove'></i></a>"							
+							"<a class='get' href='/admin/billing/stripe/removeplan/$plan[id]/'><i class='icon-remove'></i></a>"
 				];
 			}
 			$addPlan = button::init()->text("Create Plan")->addStyle('btn-inverse')->icon('plus')->isModalLauncher()->url('#createPlan')->render();
@@ -541,12 +541,12 @@ class admin extends core
 			$widget = widget::init()->icon('calendar')->span(4)->header('Stripe Plans')->isTable()->content($table)->rightHeader($addPlan)->render();
 			return $widget;
 		}
-		
+
 		private function createPlanForm()
 		{
 			$pre = "<p>When you create a plan with Stripe you are creating an automatic draft of your client's credit card on a timed basis. Note that any coupons you apply to the customer
 					will subtract from their invoice.</p>";
-			
+
 			$span = [];
 			$fields = [];
 			$fields[] = ['type' => 'input', 'text' => 'Plan Name:', 'var' => 'plan_name'];
@@ -554,7 +554,7 @@ class admin extends core
 			$opts = [];
 			$opts[] = ['val' => 'month', 'text' => 'Monthly'];
 			$opts[] = ['val' => 'year', 'text' => 'Yearly'];
-			
+
 			$span[] = ['span' => 6, 'elements' => $fields];
 			$fields = [];
 			$fields[] = ['type' => 'select', 'var' => 'plan_interval', 'opts' => $opts, 'text' => 'Interval:'];
@@ -564,11 +564,11 @@ class admin extends core
 			$form = form::init()->spanElements($span)->post('/admin/')->id('createPlanForm')->render();
 			return $pre.$form;
 		}
-		
+
 		private function getStripeCoupons()
 		{
 			$coupons = $this->stripe_getCoupons();
-			
+
 			$headers = ['ID', '%/Amt Off', 'Duration', 'Used/Max', 'Lifespan', 'Remove'];
 			$rows = [];
 			foreach ($coupons AS $coupon)
@@ -594,12 +594,12 @@ class admin extends core
 			$widget = widget::init()->icon('minus')->span(4)->header('Stripe Coupons')->isTable()->rightHeader($addCoupon)->content($table)->render();
 			return $widget;
 		}
-		
+
 		private function createCouponForm()
 		{
 			$pre = "<p>Coupons are used for monthly credit card plans. If you have a specfic service that you charge, you can apply that plan and also apply a coupon code. The customer can also
 					apply the coupon code in their billing preferences, however it will be a dropdown for admins vs. a text field for customers.</p>";
-			
+
 			$span = [];
 			$fields = [];
 			$fields[] = ['type' => 'input', 'text' => 'Coupon ID', 'comment' => 'Enter and id like HALFOFF or something coupon code-like.', 'var' => 'coupon_id'];
@@ -617,7 +617,7 @@ class admin extends core
 			$form = form::init()->id('createCouponForm')->spanElements($span)->post('/admin/')->render();
 			return $pre.$form;
 		}
-		
+
 		public function createCoupon($content)
 		{
 			if (!$content['coupon_id'] || !$content['coupon_discount'] || !$content['coupon_max_redemptions'])
@@ -627,19 +627,19 @@ class admin extends core
 			$coupon = ['id' => $couponid,
 					'duration' => $content['coupon_duration'],
 					'max_redemptions' => $content['coupon_max_redemptions']];
-			
+
 			if (preg_match("/\%/", $content['coupon_discount']))
 			{
 				$content['coupon_discount'] = str_replace("%", null, $content['coupon_discount']);
 				$coupon['percent_off'] = $content['coupon_discount'];
 			}
-			else 
+			else
 			{
 				$content['coupon_discount'] = str_replace("$", null, $content['coupon_discount']);
 				$coupon['amount_off'] = $content['coupon_discount'] * 100;
 				$coupon['currency'] = 'usd';
 			}
-			
+
 			if ($content['coupon_duration'] == 'repeating')
 				$coupon['duration_in_months'] = $content['coupon_duration_in_months'];
 
@@ -653,23 +653,28 @@ class admin extends core
 			}
 			else
 				$this->failJson('Unable to Create Coupon', $result);
-			
-			
-		}		
-		
+
+
+		}
+
 		public function stripeMain()
 		{
 			$data = base::span(4, $this->adminNav('stripe'));
-			// A few things here.. 
+			// A few things here..
 			// Plan And Coupon Administration, Also Payout Schedules.
-			 
-			$data .= $this->getStripePlans();
-			$data .= $this->getStripeCoupons();
+			if (!$this->getSetting("stripe_publish") || !$this->getSetting("stripe_private"))
+				$data .= base::span(8, "<img src='/assets/img/sad.png' align='left' style='padding-right:20px'>".base::hero("Oops. No Stripe", "You don't have any Stripe keys defined yet. Click on General Settings and add your keys!"));
+			else
+			{
+				$data .= $this->getStripePlans();
+				$data .= $this->getStripeCoupons();
+			}
+
 			$this->export(base::row($data, true));
-			
-			
+
+
 		}
-		
+
 		public function createPlan($content)
 		{
 			if (!$content['plan_name'] || !$content['plan_amount'] || !$content['plan_interval'] || !$content['plan_interval_count'])
@@ -687,7 +692,7 @@ class admin extends core
 			'id' => $planid,
 			'trial_period_days' => $content['plan_trial']
 			];
-			
+
 			$result = $this->stripe_createPlan($plan);
 			if ($result === true)
 			{
@@ -695,7 +700,7 @@ class admin extends core
 				$json['action'] = 'reload';
 				$json['url'] = '/admin/stripe/';
 				$this->jsone('success', $json);
-				
+
 			}
 			else
 				$this->failJson("Plan Creation Failed", $result);
@@ -731,7 +736,7 @@ class admin extends core
 			$rows[] = [$this->fbTime($transfer['transfer_ts']), number_format(($transfer['transfer_amt']/100),2)];
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		$data .= widget::init()->span(2)->header('Payout Schedule')->icon('truck')->content($table)->istable(true)->render();
-		$this->export(base::row($data, true));		
+		$this->export(base::row($data, true));
 	}
 
 	public function removeStripePlan($content)
@@ -763,7 +768,7 @@ class admin extends core
 		else
 			$this->failJson("Unable to Delete", $result);
 	}
-	
+
 }
 
 
