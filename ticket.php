@@ -40,20 +40,20 @@ class ticket extends core
 			if (!$ticket || !$this->isMyTicket($ticket))
 				$this->reloadTarget();
 		}
-		// Access Granted at this point. 
+		// Access Granted at this point.
 		$data = base::subHeader($this->getCompanyById($ticket['company_id']), $ticket['ticket_title']);
 		$data .= base::begin();
 
-		$this->export($data);		
+		$this->export($data);
 		$this->showTicketDetails($ticket);
-	}	
-	
+	}
+
 	private function getTicketReplies(&$ticket)
 	{
 		$private = ($this->isProvidingCompany()) ? null : "AND reply_isinternal = false";
 		$pre = "<img src='/assets/img/talking.png' width='90px' align='left' style='padding-right:10px'><div class='well'><p>$ticket[ticket_body]</p></div>";
-			
-		
+
+
 		$replies = $this->query("SELECT * from replies WHERE ticket_id='$ticket[id]' {$private} ORDER by reply_ts ASC");
 		if (!$replies)
 			return $pre . "<div class='bs-docs-example'><ul class='updatelist'><h4>No replies found.</h4></ul></div>";
@@ -65,11 +65,11 @@ class ticket extends core
 							'internal' => $reply['reply_isinternal'],
 							'post' => nl2br($reply['reply_body']),
 							'thumb' => $this->getProfilePic($reply['user_id'])
-			];	
-		
+			];
+
 		return $pre. base::feed($items);
 	}
-	
+
  	private function getCompanyNotes(&$ticket)
  	{
  		if (!$this->isProvidingCompany()) return null;
@@ -77,7 +77,7 @@ class ticket extends core
  		if (!$notes) return null;
  		return "<div class='well'><h4>Client Notes</h4><p>$notes</p></div>";
  	}
-	
+
 	private function getFiles(&$ticket)
 	{
 		$files = $this->query("SELECT * from files WHERE ticket_id='$ticket[id]' ORDER by file_ts ASC");
@@ -85,7 +85,7 @@ class ticket extends core
 		$rows = [];
 		foreach ($files AS $file)
 			$rows[] = ["<a href='/$file[file_loc]'>$file[file_title]</a> <a style='padding-left:10px;' class='get' data-title='E-mailing File' rel='tooltip' title='Email File' href='/email/file/$file[id]/'><i class='icon-envelope-alt'></i></a>", $file['file_type'], $this->getUserByID($file['user_id']), $this->fbTime($file['file_ts'])];
-		
+
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		return widget::init()->icon('download')->header('Ticket Attachments')->content($table)->isTable()->render();
 	}
@@ -93,7 +93,7 @@ class ticket extends core
 	private function getIncidentStanding(&$ticket)
 	{
 		if (!$this->isProvidingCompany()) return null;
-		// Just a simple form with a submit button really. 
+		// Just a simple form with a submit button really.
 		$fields = [['type' => 'textarea', 'span' => 12, 'rows' => 5, 'var' => 'ticket_standing', 'val' => $ticket['ticket_standing']]];
 		$save = button::init()->text('Update Standing')->addStyle('post')->formid('updateStandingForm')->addStyle('btn-success')->icon('pencil')->postvar('updateStanding')->id($ticket['id'])->render();
 		$form = form::init()->post('/ticket/')->elements($fields)->id('updateStandingForm')->render();
@@ -103,8 +103,8 @@ class ticket extends core
 		$widget = widget::init()->header('Ticket Standing')->icon('road')->content($form)->footer($save)->render();
 		return $widget;
 	}
-	
-	
+
+
 	private function createReplyForm(&$ticket)
 	{
 		// If you are the providing company allow an internal note
@@ -130,15 +130,15 @@ class ticket extends core
 		if (!$this->isMyTicket($ticket)) $this->failjson('Unable to save', "Access Denied");
 		if (!$content['reply_body']) $this->failJson('Unable to Save', 'You must enter a response.');
 		$internal = ($content['reply_isinternal']) ? true : false;
-		if ($this->isProvidingCompany()) 
+		if ($this->isProvidingCompany())
 			$status = "Waiting for Customer";
-		else 
+		else
 			$status = "Waiting for Admin";
-		
+
 		$this->updateTicket(['ticket_id' => $id,
 							 'internal' => $internal,
 							 'ticket_body' => $content['reply_body'],
-							 'ticket_status' => $status 
+							 'ticket_status' => $status
 				]);
 		$pic = $this->getProfilePic($this->user->id);
 		$json['element'] = ".updatelist";
@@ -155,18 +155,18 @@ class ticket extends core
 		$json['ev'] = js::scrollBottom();
 		$this->jsonE('success', $json);
 	}
-	
+
 	private function getBillingTab(&$ticket)
 	{
 		// Left Side Credit Card / Right Side Dwolla
-		// Each side will have a small history, update details. For dwolla, we may just update a PIN and have refund abilities. 
-		// Stripe will have apply coupon, update card, update plan. 
+		// Each side will have a small history, update details. For dwolla, we may just update a PIN and have refund abilities.
+		// Stripe will have apply coupon, update card, update plan.
 		$company = $this->query("SELECT * from companies WHERE id='$ticket[company_id]'")[0];
 		$data = "<div class='row-fluid'>";
 		$data .= "<div class='span6'>";
 		$headers = ['Date', 'Description', 'Amount'];
 		if ($this->isProvidingCompany())
-				$headers[] = "Refund"; 
+				$headers[] = "Refund";
 		$stripes = $this->query("SELECT * from transactions WHERE company_id='$ticket[company_id]' AND transaction_source='stripe'");
 		$rows = [];
 		foreach ($stripes AS $stripe)
@@ -178,8 +178,8 @@ class ticket extends core
 			];
 			if (!$this->isProvidingCompany())
 				$row = array_pop($row);
-			$rows[] = $row;			
-				
+			$rows[] = $row;
+
 		}
 		$stripeButtons = null;
 		$table = table::init()->headers($headers)->rows($rows)->render();
@@ -193,19 +193,19 @@ class ticket extends core
 			$this->exportModal(modal::init()->id('invoiceCustomer')->header('Add Item to Invoice')->content($this->StripeInvoiceForm())->footer($invButton)->render());
 		}
 		$updateCC .= button::init()->text('Update Credit Card')->isModalLauncher()->addStyle('btn-primary')->icon('money')->url('#updateCC')->render();
-		
+
 		$saveCC = button::init()->text('Save Credit Card')->addStyle('savecc')->addStyle('btn-success')->render();
 		$this->exportModal(modal::init()->id('updateCC')->header('Update Credit Card')->content($this->ccUpdateForm($ticket))->footer($saveCC)->render());
 		if (!$company['company_stripetoken'])
 			$table .= base::alert('info', 'No Credit Card Found', 'This company currently has no credit card on file.');
-		
+
 		$data .= widget::init()->header('Credit Transactions')->content($table)->isTable()->icon('credit-card')->rightHeader($updateCC)->footer($stripeButtons)->maxHeight(400)->render();
-		
-		// Show Plan Details and Upcoming Invoice. 
-		// Top part should be what plan they are on and a button that says "Update Plan" and "Retrieve Next Invoice" 
+
+		// Show Plan Details and Upcoming Invoice.
+		// Top part should be what plan they are on and a button that says "Update Plan" and "Retrieve Next Invoice"
 		// Bottom should have next invoice in an ajax form that displays when user presses retrieve .. so we're not querying stripe everytime someone opens a ticket.
-		// Use whats in the tables for the modal, add plan and coupon management in the admin section. 
-		
+		// Use whats in the tables for the modal, add plan and coupon management in the admin section.
+
 		$plan = $company['company_plan'];
 		if (!$plan)
 			$pdata = "<h5>No monthly subscription found</h5>";
@@ -232,11 +232,11 @@ class ticket extends core
 			$this->exportModal(modal::init()->id('updatePlan')->header('Update Customer Plan')->content($this->updatePlanForm())->footer($updatePlanButton)->render());
 		}
 		$data .= widget::init()->header('Subscription Details')->content($pdata)->rightHeader($updateButton)->icon('calendar')->render();
-		
-		
+
+
 		$data .= "</div>"; // end of credit card stuff
-		
-		
+
+
 		$headers = ['Date', 'Description', 'Amount'];
 		$dwollas = $this->query("SELECT * from transactions WHERE company_id='$ticket[company_id]' AND transaction_source='dwolla'");
 		$rows = [];
@@ -249,33 +249,33 @@ class ticket extends core
 		if (!$company['company_dwollatoken'])
 		{
 			$table .= base::alert('info', 'No Dwolla Authorization', 'This company has not linked their Dwolla Account.');
-			
+
 		}
-		
+
 		$dwFooter = button::init()->text("Make Checking Payment")->isModalLauncher()->url('#dwollaSend')->addStyle('btn-info')->icon('money')->render();
 		$dwFooter .= button::init()->text("Post Alternate Payment")->isModalLauncher()->url('#alternate')->addStyle('btn-warning')->icon('check')->render();
 		$sendDwolla = button::init()->formid('dwollaSendForm')->addstyle('btn-success')->text('Initiate Payment')->icon('arrow-right')->addStyle('mpost')->postVar('dwollaSend')->id($ticket['id'])->render();
 		$this->exportModal(modal::init()->id('dwollaSend')->header('Make Payment With Dwolla')->content($this->dwollaSendForm($ticket))->footer($sendDwolla)->render());
-		
+
 		$postAlternateButton = button::init()->formid('alternateForm')->addstyle('btn-success')->text('Post Payment')->icon('arrow-right')->addStyle('mpost')->postVar('postPayment')->id($ticket['id'])->render();
 		$this->exportModal(modal::init()->id('alternate')->header('Post Alternate Payment')->content($this->alternateForm())->footer($postAlternateButton)->render());
 		$data .= widget::init()->span(6)->header('Checking Transactions')->content($table)->isTable()->footer($dwFooter)->render();
 		$data .= "</div>";
-		
+
 		return $data;
-		
+
 	}
-	
+
 	private function alternateForm()
 	{
-		$pre = "<img src='/assets/img/alternate.png' align='left' style='padding-right:10px'><p>This function is designed to allow you to post cash or mailed checks to a ticket for you and your customers' records. This will 
+		$pre = "<img src='/assets/img/alternate.png' align='left' style='padding-right:10px'><p>This function is designed to allow you to post cash or mailed checks to a ticket for you and your customers' records. This will
 				show up as an actual transation in your log as 'cash/check' in the aTikit Admin</p>";
 		$opts = [
 				['val' => 'check', 'text' => 'Check'],
 				['val' => 'cash', 'text' => 'Cash']
 		];
 		$span = [];
-		
+
 		$fields = [];
 		$fields[] = ['type' => 'select', 'text' => 'Type of Payment:', 'comment' => 'What type of payment did you recieve?', 'opts' => $opts, 'var' => 'payment_type'];
 		$fields[] = ['type' => 'input', 'span' => 3, 'text' => 'Check Number (if applicable)', 'var' => 'payment_checkno'];
@@ -286,9 +286,9 @@ class ticket extends core
 		$span[] = ['span' => 5, 'elements' => $fields];
 		$form = form::init()->id('alternateForm')->spanelements($span)->post('/ticket/')->render();
 		return $pre.$form;
-	
+
 	}
-	
+
 
 	private function dwollaSendForm(&$ticket)
 	{
@@ -304,38 +304,38 @@ class ticket extends core
 			$opts[] = ['val' => $source['Id'], 'text' => $source['Name']];
 		$fields[] = ['type' => 'select', 'var' => 'dwolla_source', 'text' => 'Funding Source:', 'span' => 5, 'opts' => $opts];
 		$form = form::init()->id('dwollaSendForm')->elements($fields)->post('/ticket/')->render();
-		return $pre.$form;		
+		return $pre.$form;
 	}
-	
-	
+
+
 	private function cancelPlanForm()
 	{
-		
+
 		$pre = "<img src='/assets/img/cancel.jpg' align='left' width='200px' style='padding-right:10px'><h4>Cancel Subscription</h4>
 				<p>This will cancel your monthly subscription immediately. Press Confirm below to complete.</p>";
 		$fields = [];
 		$form = form::init()->post('/ticket/')->id('cancelForm')->elements($fields)->render();
 		return $pre.$form;
-		
+
 	}
 	private function updatePlanForm()
 	{
 		$pre = "<img src='/assets/img/subscription.jpg' align='left' width='200px'><p>If you are updating a subscription, if the new plan is an additional cost then your client will be billed a pro-rated amount for the interval specified in the configuration. If the amount is
 				less than their previous plan then the customer will be credited the pro-rated amount.</p>";
-		
+
 		$fields = [];
 		$opts = [];
 		$plans = $this->query("SELECT * from plans ORDER by plan_name ASC");
 		foreach ($plans AS $plan)
 		{
-			$int = ($plan['plan_interval'] == 1) ? "Monthly" : "Every $plan[plan_interval] Months"; 
+			$int = ($plan['plan_interval'] == 1) ? "Monthly" : "Every $plan[plan_interval] Months";
 			$opts[] = ['val' => $plan['id'], 'text' => $plan['plan_name'] . " ($" . number_format($plan['plan_amount'],2). "/ $int)"];
 		}
 		$fields[] = ['type' => 'select', 'text' => 'Select New Plan:', 'opts' => $opts, 'var' => 'plan_id'];
 		$form = form::init()->post('/ticket/')->elements($fields)->id('updatePlanForm')->render();
 		return $pre.$form;
 	}
-	
+
 	private function stripeInvoiceForm()
 	{
 		$pre = "<p>Stripe allows you to create monthly plans for each of your customers. Should an item need to be appeneded to the next invoice you can enter this item here. <b>Note:</b> Invoiced items are affected
@@ -343,11 +343,11 @@ class ticket extends core
 		$fields = [];
 		$fields[] = ['type' => 'input', 'span' => 3, 'text' => 'Description:', 'comment' => 'This description will be shown on the invoice.', 'var' => 'charge_desc'];
 		$fields[] = ['type' => 'input', 'span' => 1, 'prepend' => '$', 'text' => 'Amount:', 'bottom' => 'Enter the amount in dollars and cents. (i.e. 12.43)', 'var' => 'charge_amount'];
-		
+
 		$pre = "<img src='/assets/img/invoice.jpg' width='250px' align='left'>$pre";
 		return $pre . form::init()->id('addInvItem')->post('/ticket/')->elements($fields)->render();
 	}
-	
+
 	private function billCCForm()
 	{
 		$pre = "<p>This will bill the customer's credit card immediately. The charge will not show up in the charges list below until the transactions clears. Stripe will notify aTikit as soon as funds have been
@@ -355,12 +355,12 @@ class ticket extends core
 		$fields = [];
 		$fields[] = ['type' => 'input', 'span' => 3, 'text' => 'Description:', 'comment' => 'This description will be shown on the invoice.', 'var' => 'charge_desc'];
 		$fields[] = ['type' => 'input', 'span' => 1, 'prepend' => '$', 'text' => 'Amount:', 'bottom' => 'Enter the amount in dollars and cents. (i.e. 12.43)', 'var' => 'charge_amount'];
-		
+
 		$pre = "<img src='/assets/img/creditcard.jpg' width='250px' align='left'> $pre";
 		return $pre . form::init()->id('billCCForm')->post('/ticket/')->elements($fields)->render();
-		
+
 	}
-	
+
 	private function ccUpdateForm(&$ticket)
 	{
 		$cid = $ticket['company_id'];
@@ -370,13 +370,13 @@ class ticket extends core
 		$fields[] = array('type' => 'input', 'text' => 'Name on Card', 'val' => null, 'var' => null, 'class' => 'card-name');
 		$fields[] = array('type' => 'input', 'text' => 'Card Number', 'val' => null, 'var' => null,  'class' => 'card-number');
 		$fields[] = array('type' => 'input', 'text' => 'CVC', 'labelnote' => '3 digits' , 'val' => null, 'var' => null, 'comment' => 'Enter 3 or 4 digit code on back of your card', 'class' => 'card-cvc');
-		
+
 		$span[] = ['span' => 6, 'elements' => $fields];
 		$fields = [];
 		$fields[] = array('type' => 'input', 'text' => 'Expiration Month', 'val' => null, 'var' => null, 'comment' => 'Expiration Month in Two Digits', 'class' => 'card-expiry-month');
 		$fields[] = array('type' => 'input', 'text' => 'Expiration Year',  'val' => null, 'var' => null, 'comment' => 'Expiration Year in Four Digits', 'class' => 'card-expiry-year');
 		$fields[] = array('type' => 'input', 'text' => 'Billing Zip Code', 'val' => null, 'var' => null, 'class' => 'card-zip');
-		
+
 		$fields[] = ['type' => 'hidden', 'var' => 'cid', 'val' => $ticket['company_id']];
 		$fields[] = ['type' => 'hidden', 'var' => 'tid', 'val' => $ticket['id']];
 		$span[] = ['span' => 6, 'elements' => $fields];
@@ -386,13 +386,13 @@ class ticket extends core
 		$this->exportJs(js::maskInput('card-expiry-year', "9999"));
 		$form = form::init()->id('payment-form')->post('/ticket/')->spanElements($span)->render();
 		$pre = "<p>You are about to add or update your billing information. <b>This will not charge your credit card</b>. This is merely updating our merchant with your new card details.</p>";
-		
+
 		return $pre.$form;
 	}
-	
+
 	private function getTicketBilled(&$ticket)
 	{
-		if (!$this->canSeeBilling() && $this->isProvidingCompany()) 
+		if (!$this->canSeeBilling() && $this->isProvidingCompany())
 			return null;
 		$headers = ['Date', 'Description', 'Amount'];
 		$stripes = $this->query("SELECT * from transactions WHERE ticket_id='$ticket[id]'");
@@ -403,12 +403,12 @@ class ticket extends core
 			$stripe['transaction_desc'],
 			"$" . number_format($stripe['transaction_amount'],2)
 			];
-			$rows[] = $row;			
-				
+			$rows[] = $row;
+
 		}
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		$buttons = null;
-		
+
 		if (!$this->isProvidingCompany())
 		{
 			if ($this->company->company_stripeid)
@@ -423,11 +423,11 @@ class ticket extends core
 				$sendDwolla = button::init()->formid('dwollaSendForm')->addstyle('btn-success')->text('Initiate Payment')->icon('arrow-right')->addStyle('mpost')->postVar('dwollaSend')->id($ticket['id'])->render();
 				$this->exportModal(modal::init()->id('dwollaSend')->header('Make Payment With Dwolla')->content($this->dwollaSendForm($ticket))->footer($sendDwolla)->render());
 			}
-			
+
 		}
 		return widget::init()->header("Ticket Charges")->icon('money')->content($table)->isTable()->footer($buttons)->render();
 	}
-	
+
 	private function customerCCPayment($content)
 	{
 		$company = $this->getSetting('mycompany');
@@ -438,7 +438,7 @@ class ticket extends core
 		$pre = "<img src='/assets/img/creditcard.jpg' width='250px' align='left'> $pre";
 		return $pre . form::init()->id('billCCForm')->post('/ticket/')->elements($fields)->render();
 	}
-	
+
 	private function getHistory(&$ticket)
 	{
 		$company = $this->query("SELECT * from companies WHERE id='$ticket[company_id]'")[0];
@@ -455,33 +455,33 @@ class ticket extends core
 				];
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		$data .= widget::init()->icon('envelope')->header('Previous Tickets')->maxHeight(450)->content($table)->istable(true)->render();
-		
-		
+
+
 		$data .= "</div>";
 		if ($this->isProvidingCompany())
 		{
-			
+
 			$data .= "<div class='span6'>";
-			
+
 			$fields = [['type' => 'textarea', 'span' => 12, 'rows' => 10, 'var' => 'company_notes', 'val' => $company['company_notes']]];
 			$save = button::init()->text('Update Customer Notes')->addStyle('post')->formid('updateCustomerNotesForm')->addStyle('btn-success')->icon('pencil')->postvar('updateNotes')->id($company['id'])->render();
 			$form = form::init()->post('/ticket/')->elements($fields)->id('updateCustomerNotesForm')->render();
 			$form = "<img src='/assets/img/notes.jpg' align='left'>$form";
-			$data .= widget::init()->header('Customer Notes')->icon('road')->content($form)->footer($save)->render();			
+			$data .= widget::init()->header('Customer Notes')->icon('road')->content($form)->footer($save)->render();
 			$data .= "</div>";
 		}
 		$data .= "</div>";
-		
+
 		return $data;
-		
+
 	}
-	
-	
+
+
 	private function showTicketDetails(&$ticket)
 	{
 		$tabs = [];
 		$crumbs = base::crumbs([['url' => '#', 'text' => "($ticket[id]) $ticket[ticket_title]"]]);
-		// Tab #1 is going to be split. So lets create the span6 that we will need. 
+		// Tab #1 is going to be split. So lets create the span6 that we will need.
 	    // Update Active Queue
 	    $_SESSION['activeQueue'] = $ticket['queue_id'];
 		$replyContent = "
@@ -489,7 +489,7 @@ class ticket extends core
 							<div class='span6'>".$this->getTicketReplies($ticket)."</div>
 							<div class='span6'>".$this->getFiles($ticket).$this->getCompanyNotes($ticket).$this->getTicketBilled($ticket).$this->getIncidentStanding($ticket)."</div>
 						</div>";
-				
+
 		// Counter Init
 		$maincount = $this->returnCountFromTable("replies", "ticket_id='$ticket[id]' AND reply_isinternal = false");
 		$subcount = $this->returnCountFromTable("subtickets", "ticket_id='$ticket[id]' AND subticket_isclosed = false");
@@ -502,15 +502,16 @@ class ticket extends core
 		if ($this->canSeeBilling() || !$this->isProvidingCompany())
 		{
 			$tabs[] = ['id' => 'sow', 'title' => "<i class='icon-bookmark'></i> Statement of Work", 'content' => $this->getStatementOfWork($ticket)];
-			
+
 		}
 		if ($this->canSeeBilling() && $this->isProvidingCompany())
 			$tabs[] = ['id' => 'billing', 'title' => "<i class='icon-money'></i> Billing", 'content' => $this->getBillingTab($ticket)];
-		
+
 		$buttons = button::init()->text('Add Reply')->isModalLauncher()->url('#createReplyModal')->addStyle('btn-inverse')->icon('comment')->render();
 		$buttons .= button::init()->text('Upload File')->isModalLauncher()->url('#uploadFile')->addStyle('btn-info')->icon('arrow-up')->render();
 		$buttons .= button::init()->text('Close Ticket')->url("/close/$ticket[id]/")->addStyle('btn-danger')->addStyle('get')->icon('remove')->render();
 		$fbuttons = $buttons;
+		$buttons .= button::init()->text('Queue Transfer')->url('#queueTransfer')->addStyle('btn-primary')->isModalLauncher()->icon('share-alt')->render();
 		$fbuttons .= button::init()->text('Back to Top')->url("#")->addStyle('btn-warning')->addStyle('top')->icon('arrow-up')->render();
 		$fbuttons .= button::init()->text('Ticket List')->url("/")->addStyle('btn-primary')->icon('arrow-left')->render();
 		$widget = widget::init()->span(12)->icon('edit')->header($ticket['ticket_title'])->isTabs($tabs)->rightHeader($buttons)->footer($fbuttons)->render();
@@ -519,11 +520,28 @@ class ticket extends core
 		$this->exportModal(modal::init()->id('createReplyModal')->header('Add Reply')->content($this->createReplyForm($ticket))->footer($save)->render());
 		$saveFile = button::init()->formid('newUploadForm')->addStyle('mpost')->postVar('createAttachment')->text('Save Attachment')->addStyle('btn-success')->icon('ok')->message('Submitting..')->id($ticket['id'])->render();
 		$this->exportModal(modal::init()->id('uploadFile')->header('Upload Attachment')->content($this->createUploadForm($ticket))->footer($saveFile)->render());
+		$transfer = button::init()->addStyle('btn-primary')->icon('share-alt')->text("Transfer Ticket")->addStyle('mpost')->formid("queueTransferForm")->postVar("transferTicket")->message("Transferring..")->id($ticket['id'])->render();
+		$this->exportModal(modal::init()->id('queueTransfer')->header("Queue Transfer")->content($this->queueTransferForm($ticket))->footer($transfer)->render());
 		$this->export($data);
 		$this->exportjs(js::scrollBottom());
 		$this->exportjs(js::scrollTop('top'));
 	}
-	
+
+	private function queueTransferForm(&$ticket)
+	{
+		$pre = "<img src='/assets/img/transfer.png' align='left' style='padding-right:10px'><h3>Queue Transfer</h3><p>If you are transferring this ticket into a queue you do not have access to you will no longer be able to
+				update the ticket unless it is transferred back. This is useful for sending tickets to a billing queue for processing.</p>";
+		$queues = $this->query("SELECT * from queues WHERE id != '$ticket[queue_id]' ORDER by queue_name ASC");
+		$opts = [];
+		foreach ($queues AS $queue)
+			$opts[] = ['val' => $queue['id'], 'text' => $queue['queue_name']];
+		$fields = [];
+		$fields[] = ['type' => 'select', 'text' => 'Queue:', 'comment' => 'Select the queue to transfer ticket into.', 'opts' => $opts, 'var' => 'new_q'];
+		$form = form::init()->id('queueTransferForm')->elements($fields)->post('/ticket/')->render();
+		return $pre.$form;
+	}
+
+
 	private function getStatementOfWork(&$ticket)
 	{
 		$data = "<div class='row-fluid'>";
@@ -531,12 +549,12 @@ class ticket extends core
 		if (!$sow)
 			$sdata .= "<h5>No Statement of Work Found</h5>
 					<p>A statement of work is a quote for work to be completed. The statement of work can be used as an invoice for clients who require an invoice before payment is made. aTikit generated invoices generally
-					after a payment has been made, therefore this system allows clients to have the proper paperwork in order to process payment on their end.</p>";  
-		else 
+					after a payment has been made, therefore this system allows clients to have the proper paperwork in order to process payment on their end.</p>";
+		else
 		{ // Get SOW Details
 			if (!$sow['sow_accepted'])
 				$sdata .= base::alert('warning', 'Statement Pending', "This statement of work has not been approved.");
-			
+
 			$items = [];
 			$items[] = ['label' => 'Created/Updated:', 'content' => $this->fbTime($sow['sow_updated'])];
 			$items[] = ['label' => 'Created By', 'content' => $this->getUserByID($sow['sow_updatedby'])];
@@ -551,20 +569,20 @@ class ticket extends core
 		$items = $this->decode($sow['sow_meta']);
 		if (!is_array($items))
 			$items = [];
-		
+
 		$headers = ['Description', 'Price', 'QTY', 'Ext. Price'];
 		$rows = [];
 		$ttl = 0;
 		foreach ($items AS $ix => $item)
 		{
 			$del = ($this->isProvidingCompany()) ? " &nbsp;&nbsp; <a class='get' href='/sow/remove/$sow[id]/$ix/'><i class='icon-remove'></i></a>" : null;
-			$rows[] = [$item['desc'] . $del, 
+			$rows[] = [$item['desc'] . $del,
 			"$". number_format($item['price'], 2),
 			$item['qty'],
 			"$". number_format($item['extprice'], 2),
 			];
 			$ttl += $item['extprice'];
-		}		
+		}
 		$rows[] = [null, null, "<span class='pull-right'><b>Total:</span>", "<b>$" . number_format($ttl, 2)."</b>", 'blue'];
 		$table = table::init()->headers($headers)->rows($rows)->id('sowTable')->render();
 		$modifyButton = null;
@@ -586,11 +604,11 @@ class ticket extends core
 		$data .= widget::init()->span(4)->icon('share')->header('Statement Status')->content($sdata)->render();
 		$data .= "</div>";
 		return $data;
-		
-		
-		
+
+
+
 	}
-	
+
 	private function addStatementForm(&$sow)
 	{
 		$fields = [];
@@ -603,18 +621,18 @@ class ticket extends core
 		$form = form::init()->id('addSOWForm')->elements($fields)->post('/ticket/')->render();
 		return $pre.$form;
 	}
-	
+
 	private function createUploadForm(&$ticket)
 	{
 		$pre = "<p>You can upload any type of file into the ticket. The file must not exceed 20MB in size. If you wish to upload a file larger than 20MB, please make prior arrangements to send to another e-mail address.</p>";
 		$fields = [];
 		$fields[] = ['type' => 'input', 'text' => 'Description:', 'var' => 'file_title'];
 		$fields[] = ['type' => 'ajax', 'text' => 'Upload:', 'id' => 'uploadBlock'];
-		
+
 		$this->exportJS(js::ajaxFile('uploadBlock', "t_$ticket[id]"));
 		return $pre . form::init()->post('/ticket/')->elements($fields)->id('newUploadForm')->render();
 	}
-	
+
 	public function saveAttachment($content)
 	{
 		$tid = $content['createAttachment'];
@@ -630,7 +648,7 @@ class ticket extends core
 		$json['url'] = "/ticket/$tid/";
 		$this->jsone('success', $json);
 	}
-	
+
 	public function closeTicket($content)
 	{
 		$ticket = $this->query("SELECT * from tickets WHERE id='$content[close]'")[0];
@@ -644,7 +662,7 @@ class ticket extends core
 		$json['url'] = "/";
 		$this->jsone('success',$json);
 	}
-	
+
 	public function updateStanding($content)
 	{
 		$ticket = $this->query("SELECT * from tickets WHERE id='$content[updateStanding]'")[0];
@@ -656,10 +674,10 @@ class ticket extends core
 		$json['gtitle'] = 'Standing Updated';
 		$json['gbody'] = "The standing for this incident has been updated.";
 		$json['action'] = 'reassignsource';
-		$json['elementval'] = "Standing Saved."; 
+		$json['elementval'] = "Standing Saved.";
 		$this->jsone('success', $json);
 	}
-	
+
 	private function getSubTickets(&$ticket)
 	{
 		$subs = $this->query("SELECT * from subtickets WHERE ticket_id='$ticket[id]'");
@@ -673,7 +691,7 @@ class ticket extends core
 			$ss = ($sub['subticket_isclosed']) ? "<s>" : null;
 			$se = ($sub['subticket_isclosed']) ? "</s>": null;
 			$rows[] = ["<a class='get' href='/ticket/$ticket[id]/$sub[id]/'>{$ss}$sub[subticket_title]{$se}</a>",
-				($sub['subticket_assigned']) ? "<a class='get' href='/assign/sub/$sub[id]/'>".$this->getUserById($sub['subticket_assigned'])."</a>" : "<a class='get' href='/assign/sub/$sub[id]/'>Unassigned</a>",	 
+				($sub['subticket_assigned']) ? "<a class='get' href='/assign/sub/$sub[id]/'>".$this->getUserById($sub['subticket_assigned'])."</a>" : "<a class='get' href='/assign/sub/$sub[id]/'>Unassigned</a>",
 				$this->getUserById($sub['subticket_creator']),
 				$this->fbTime($sub['subticket_lastupdated']),
 			$color];
@@ -683,26 +701,26 @@ class ticket extends core
 		else
 			$data .= table::init()->id('tasks')->headers($headers)->rows($rows)->render();
 		$data .= "$addButton</div>";
-		
-		
+
+
 		// Start Viewer on the next 6 span.
 		$data .= "<div class='span6'>";
 		$data .= widget::init()->header("<span class='viewportTitle'>Task Viewport</span>")->content("<div id='viewport'></div>")->icon('tasks')->render();
 		$data .= "</div>"; // end span6
 		$data .= "</div>"; // end rowfluid
 		$save = button::init()->addStyle('mpost')->addStyle('btn-primary')->icon('ok')->text('Create Task')->formid('addTaskForm')->postVar('addTask')->id($ticket['id'])->render();
-		$this->exportModal(modal::init()->header('Add Task')->content($this->addTaskForm())->id('addTask')->footer($save)->render());		
+		$this->exportModal(modal::init()->header('Add Task')->content($this->addTaskForm())->id('addTask')->footer($save)->render());
 		return $data;
 	}
-	
+
 	private function addTaskForm()
 	{
 		$pre = "<img src='/assets/img/tasks.jpg' align='left' width='200px' style='padding-right:10px'><h3>Create Task</h3>";
 		$fields[] = ['type' => 'input', 'text' => 'Task Subject:', 'var' => 'subticket_title'];
 		$fields[] = ['type' => 'textarea', 'span' => 4, 'rows' => 6, 'text' => 'Task Details:', 'var' => 'subticket_body'];
 		return $pre .form::init()->id('addTaskForm')->elements($fields)->post('/ticket/')->render();
-	}	
-	
+	}
+
 	public function addTask($content)
 	{
 		$tid = $content['addTask'];
@@ -716,7 +734,7 @@ class ticket extends core
 		$now = time();
 		$this->query("INSERT into subtickets SET subticket_lastupdated='$now', subticket_creator='{$this->user->id}', ticket_id='$tid', subticket_title='$content[subticket_title]', subticket_body='$content[subticket_body]'");
 		$subid = $this->insert_id;
-		// Lets render the new task into the list as we fade the modal out. 
+		// Lets render the new task into the list as we fade the modal out.
 		$this->notifyProvider("Task added in Ticket #$tid", $this->user->user_name. " added a new task ($content[subticket_title])", "/ticket/$tid/");
 		$json = [];
 		$json['gtitle'] = "Task Added";
@@ -726,7 +744,7 @@ class ticket extends core
 		$json['content'] = "<tr><td><a class='get' href='/ticket/$tid/$subid/'>$content[subticket_title]</a></td><td>Unassigned</td><td>{$this->user->user_name}</td><td>Just Now!</td></tr>";
 		$this->jsone('success', $json);
 	}
-	
+
 	public function viewTask($content)
 	{
 		$tid = $content['tid'];
@@ -737,14 +755,14 @@ class ticket extends core
 		$subticket = $this->query("SELECT * from subtickets WHERE id='$sid' AND ticket_id='$tid'")[0];
 		$data = "<div class='well'>" . nl2br($subticket['subticket_body']) . "</div>";
 		// display feed like you would a normal ticket from the subticket meta
-		// our output is going to be a json response filling in the viewPort element with the task data. 
-		
+		// our output is going to be a json response filling in the viewPort element with the task data.
+
 		//Form will be inline. No reason to modal the crap out of everything.
 		$meta = $this->decode($subticket['subticket_meta']);
 		if (!is_array($meta))
 			$meta = [];
-		$items = [];		
-		
+		$items = [];
+
 		foreach ($meta['replies'] AS $reply)
 				$items[] = [
 				'url' => '#',
@@ -766,22 +784,22 @@ class ticket extends core
 		$json['element'] = '#viewport';
 		$json['restore'] = true; // Restore link values.
 		$json['content'] = $data;
-		$json['ev'] = "$('.viewportTitle').html('$subticket[subticket_title]'); "; 
+		$json['ev'] = "$('.viewportTitle').html('$subticket[subticket_title]'); ";
 		$this->jsonE('success', $json);
 	}
-	
+
 	private function taskUpdateForm(&$subticket)
 	{
 		$fields = [];
 		$fields[] = ['type' => 'textarea', 'span' => 12, 'rows' => 6, 'var' => 'reply_body', 'text' => 'Reply:'];
-		
+
 		$data = form::init()->post('/ticket/')->elements($fields)->id('taskReplyForm')->render();
 		$data .= button::init()->addStyle('btn-primary')->text('Update Task')->postVar('updateTask')->id($subticket['id'])->message('Updating Task..')->addStyle('post')->icon('plus-sign')->formid('taskReplyForm')->render();
 		$data .= button::init()->addStyle('btn-danger')->text('Close Task')->url("/closetask/$subticket[id]/")->message('Closing Task..')->icon('remove')->addStyle('get')->formid('taskReplyForm')->render();
-		
+
 		return $data;
 	}
-	
+
 	public function closeTask($content)
 	{
 		$sid = $content['closeTask'];
@@ -795,10 +813,10 @@ class ticket extends core
 		$json['action'] = 'reload';
 		$json['url'] = "/ticket/$ticket[id]/";
 		$this->jsonE('success', $json);
-		
+
 	}
-	
-	
+
+
 	public function updateTask($content)
 	{
 		$sid = $content['updateTask'];
@@ -808,18 +826,18 @@ class ticket extends core
 			$this->failJson("Access Denied", "Not your ticket.");
 		if (!$content['reply_body'])
 			$this->failjson('Unable to update', 'You must enter a reply into the box.');
-				
-		// Subticket replies are done in meta, not in a table. 
+
+		// Subticket replies are done in meta, not in a table.
 		$meta = $this->decode($sub['subticket_meta']);
 		if (!is_array($meta))
 			 $meta = [];
 		// Store in the ['replies'] key.
-		$now = time(); 
+		$now = time();
 		$meta['replies'][] = ['reply_ts' => $now,
 							'user_id' => $this->user->id,
 							'company_id' => $this->company->id,
 							'reply_body' => $content['reply_body']];
-							
+
 		$meta = $this->encode($meta);
 		$now = time();
 		$this->query("UPDATE subtickets SET subticket_lastupdated='$now', subticket_meta='$meta', subticket_isclosed = false WHERE id='$sid'");
@@ -838,11 +856,11 @@ class ticket extends core
 				'ago' => 'Just now']);
 		$this->jsone('success', $json);
 	}
-	
+
 	public function updateToken($content)
 	{
 		// Get Current Token - If none exists, then we need to create the customer w/ stripe and get their id
-		
+
 		if ($this->isProvidingCompany())
 		{
 			$stripeid = $this->returnFieldFromTable("company_stripeid", "companies", "id='$content[cid]'");
@@ -856,7 +874,7 @@ class ticket extends core
 				$this->stripe_updateCustomer($content['stripeToken'], $content['cid']);
 				$this->query("UPDATE companies SET company_stripetoken='$content[stripeToken]' WHERE id='$content[cid]'");
 			}
-			
+
 		}
 		else
 		{
@@ -871,13 +889,13 @@ class ticket extends core
 				$this->stripe_updateCustomer($content['stripeToken'], $content['cid']);
 				$this->query("UPDATE companies SET company_stripetoken='$content[stripeToken]' WHERE id='{$this->company->id}'");
 			}
-			
+
 		}
-		
-		
+
+
 		$this->reloadTarget("/ticket/$content[tid]/");
 	}
-	
+
 	public function createStripeCharge($content)
 	{
 		if (!$this->canSeeBilling() && $this->isProvidingCompany())
@@ -897,9 +915,9 @@ class ticket extends core
 		$check = @$amount / 1; // 1253 / 1 should be 1253.. Otherwise something wierd was entered.
 		if ($check != $amount)
 			$this->failJson("Unable to Process", "Unable to process amount given.");
-		
-		// Send to stripe.. wait for a response. 
-		
+
+		// Send to stripe.. wait for a response.
+
 		$content['charge_desc'] = "[$tid] " . $content['charge_desc'];
 		$result = $this->stripe_chargeCustomer($amount, $content['charge_desc'], $cid);
 		if ($result === true)
@@ -913,7 +931,7 @@ class ticket extends core
 		else
 			$this->failJson('Transaction Declined', "The credit card was declined. Reason: $result");
 	}
-	
+
 	public function createStripeInvoiceItem($content)
 	{
 		if (!$this->canSeeBilling() || !$this->isProvidingCompany())
@@ -931,9 +949,9 @@ class ticket extends core
 		$check = @$amount / 1; // 1253 / 1 should be 1253.. Otherwise something wierd was entered.
 		if ($check != $amount)
 			$this->failJson("Unable to Process", "Unable to process amount given.");
-		
+
 		// Send to stripe.. wait for a response.
-		
+
 		$content['charge_desc'] = "[$tid] " . $content['charge_desc'];
 		$result = $this->stripe_invoiceitem($amount, $content['charge_desc'], $cid);
 		if ($result === true)
@@ -947,7 +965,7 @@ class ticket extends core
 		else
 			$this->failJson('Unable to Add to Invoice', "Stripe rejected the invoice item. Reason: $result");
 	}
-	
+
 	public function updateStripePlan($content)
 	{
 		$cid = $content['updatePlan'];
@@ -967,12 +985,12 @@ class ticket extends core
 		else
 			$this->failJson('Unable to Change Plan', "Stripe rejected the plan change. Reason: $result");
 	}
-	
+
 	public function addItemtoSow($content)
 	{
 		if (!$this->canSeeBilling() || !$this->isProvidingCompany())
 			$this->failJson("Access Denied", "You do not have permissions to do this function.");
-		 
+
 		$price = $content['price'] * 100; // Take 12.53 and make it 1253 (stripe only works in cents)
 		$check = @$price/ 1; // 1253 / 1 should be 1253.. Otherwise something wierd was entered.
 		if ($check != $price)
@@ -1000,7 +1018,7 @@ class ticket extends core
 			$this->query("UPDATE sows SET sow_title='$content[sow_title]', sow_sent = false, sow_meta='$items', sow_updated='$now', sow_accepted = false, sow_updatedby = '{$this->user->id}' WHERE id='$sow[id]'");
 		else
 			$this->query("INSERT INTO sows SET sow_title='$content[sow_title]', sow_sent = false, ticket_id='$tid', sow_meta='$items', sow_updated='$now', sow_accepted = false, sow_updatedby = '{$this->user->id}'");
-		
+
 		$json = [];
 		$json['action'] = 'fade';
 		$json['gtitle'] = "Item Added";
@@ -1008,9 +1026,9 @@ class ticket extends core
 		$json['raw'] = "<tr><td>$content[desc]</td><td>$content[price]</td><td>$content[qty]</td><td>$extprice</td></tr>";
 		$json['ev'] = "$(data.raw).prependTo('#sowTable').slideDown('slow')";
 		$this->jsone('success', $json);
-		
+
 	}
-	
+
 	public function sendSOW($content)
 	{
 		if (!$this->canSeeBilling() || !$this->isProvidingCompany())
@@ -1022,13 +1040,13 @@ class ticket extends core
 		if (!is_array($items))
 			$this->failJson("Unable to Send", "This statement of work is empty");
 		$hash = md5(uniqid());
-		
+
 		$url = $this->getSetting('atikit_url');
-		
+
 		$loc = $this->createPDFSOW($sow);
-		$this->mailCompany($ticket['company_id'], "Statement of Work Created/Updated", "A new statement of work has been created or updated for ticket #{$tid} ($ticket[ticket_title]). The statement has been attached in 
+		$this->mailCompany($ticket['company_id'], "Statement of Work Created/Updated", "A new statement of work has been created or updated for ticket #{$tid} ($ticket[ticket_title]). The statement has been attached in
 this email. If you wish to approve this statement and begin work, click the link below.
-		
+
 $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json = [];
 		$json['gtitle'] = "Statement sent.";
@@ -1036,9 +1054,9 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json['action'] = 'reassignsource';
 		$json['elementval'] = "Statement Sent.";
 		$this->query("UPDATE sows SET sow_hash='$hash', sow_sent = true WHERE id='$sow[id]'");
-		$this->jsone('success', $json); 
+		$this->jsone('success', $json);
 	}
-	
+
 	public function removeSOWItem($content)
 	{
 		$sid = $content['removeSOWItem'];
@@ -1046,7 +1064,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		if (!$this->canSeeBilling() || !$this->isProvidingCompany())
 			$this->failJson("Access Denied", "You do not have permissions to do this function.");
 		$sow = $this->query("SELECT * from sows WHERE id='$sid'")[0];
-		$now = time();	
+		$now = time();
 		$items = $this->decode($sow['sow_meta']);
 		unset($items[$index]);
 		$items = $this->encode($items);
@@ -1056,7 +1074,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json['url'] = "/ticket/$sow[ticket_id]/";
 		$this->jsone('success', $json);
 	}
-	
+
 	public function cancelPlan($content)
 	{
 		$cid = $content['cancelPlan'];
@@ -1074,10 +1092,10 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 			$this->notifyProvider("Subscription Cancelled", $this->getCompanyById($cid) . " has cancelled their subscription.", null);
 			$this->jsone('success', $json);
 		}
-		else 
+		else
 			$this->failjson("Unable to Cancel", "Reason: ". $result);
 	}
-	
+
 	public function downloadSOW($content)
 	{
 		$sow = $this->query("SELECT * from sows WHERE id='$content[downloadSOW]'")[0];
@@ -1087,13 +1105,13 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$this->ajax = true;
 		$this->createPDFSOW($sow, true);
 	}
-	
+
 	public function updateCustomerNotes($content)
 	{
 		$cid = $content['updateNotes'];
-		if (!$this->isProvidingCompany()) 
+		if (!$this->isProvidingCompany())
 			$this->failJson('Access Denied', 'You cannot access this feature.');
-		
+
 		$this->query("UPDATE companies SET company_notes='$content[company_notes]' WHERE id='$cid'");
 		$json = [];
 		$json['gtitle'] = 'Notes Updated';
@@ -1102,7 +1120,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json['elementval'] = 'Notes Updated!';
 		$this->jsonE('success', $json);
 	}
-	
+
 	public function createDwollaPayment($content)
 	{
 		$tid= $content['dwollaSend'];
@@ -1119,8 +1137,8 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 			$this->jsone('success', $json);
 		}
 		else
-			$this->failJson("Unable to Authorize", $result);		
-		
+			$this->failJson("Unable to Authorize", $result);
+
 	}
 	public function assignSubTask($content)
 	{
@@ -1137,9 +1155,9 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json['action'] = 'reassignsource';
 		$json['elementval'] = $this->user->user_name;
 		$this->jsone('success', $json);
-		
+
 	}
-	
+
 	public function postPayment($content)
 	{
 		if (!$this->isProvidingCompany())
@@ -1153,7 +1171,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$now = time();
 		if ($content['payment_type'] == 'check')
 			$content['payment_desc'] = "Check #: $content[payment_checkno] - " . $content['payment_desc'];
-		$this->query("INSERT into transactions SET transaction_merchant_id='$transid', transaction_ts='$now', 
+		$this->query("INSERT into transactions SET transaction_merchant_id='$transid', transaction_ts='$now',
 				transaction_amount='$content[payment_amt]', transaction_fee='0.00', transaction_net='$content[payment_amt]',
 				transaction_source='$content[payment_type]', transaction_desc='$content[payment_desc]', ticket_id='$tid', company_id='$ticket[company_id]'");
 		$json = [];
@@ -1177,7 +1195,28 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$json['elementval'] = "<i class='icon-share'></i>";
 		$this->jsone('success', $json);
 	}
-	
+
+	public function transferTicket($content)
+	{
+		$id = $content['transferTicket'];
+		$ticket = $this->query("SELECT * from tickets WHERE id='$id'")[0];
+		if (!$this->isMyTicket($ticket))
+			$this->failJson("Access Denied", "This is not your ticket");
+		$name = $this->returnFieldFromTable("queue_name", "queues", "id='$content[new_q]'");
+		if (!$name)
+			$this->failJson("Unable to Transfer", "You must specifiy a queue");
+		$this->updateTicket(['ticket_id' => $id,
+							 'internal' => true,
+							 'ticket_body' => "<h4>Ticket Escalated to $name",
+							 'ticket_status' => "Queue Transferred"
+				]);
+		$this->query("UPDATE tickets SET queue_id='$content[new_q]' WHERE id='$id'");
+		$json = [];
+		$json['action'] = 'reload';
+		$json['url'] = '/';
+		$this->json('success', $json);
+	}
+
 } // class
 
 
@@ -1229,3 +1268,5 @@ else if (isset($_POST['postPayment']))
 	$mod->postPayment($_POST);
 else if (isset($_GET['emailFile']))
 	$mod->emailFile($_GET);
+else if (isset($_POST['transferTicket']))
+	$mod->transferTicket($_POST);
