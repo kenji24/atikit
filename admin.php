@@ -729,11 +729,16 @@ class admin extends core
 		$data .= widget::init()->span(6)->header('Transaction Log')->content($table)->icon('credit-card')->istable(true)->render();
 		$this->exportjs(js::datatable('tlog', 50));
 		$headers = ['Payout Schedule', 'Amount'];
+		$ttl = 0;
 		$rows = [];
 		$now = time();
 		$transfers = $this->query("SELECT * from transfers WHERE transfer_ts > $now ORDER by transfer_ts DESC");
 		foreach ($transfers AS $transfer)
+		{
+			$ttl += $transfer['transfer_amt'];
 			$rows[] = [$this->fbTime($transfer['transfer_ts']), number_format(($transfer['transfer_amt']/100),2)];
+		}
+		$rows[] = ["<span class='pull-right'>Total Pending:", "$". number_format($ttl/100,2), 'green'];
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		$data .= widget::init()->span(2)->header('Payout Schedule')->icon('truck')->content($table)->istable(true)->render();
 		$this->export(base::row($data, true));

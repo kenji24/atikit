@@ -20,7 +20,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @package atikit10
- * 
+ *
  */
 require_once ("classes/core.inc.php");
 $mod = new core ( true, true );
@@ -40,19 +40,19 @@ catch (Exception $e)
 $data = $event->data ['object'];
 $mod->log("Handling $event->type", "stripeHooks");
 switch ($event->type) {
-	
-	
+
+
 	case "customer.subscription.created" :
 		syslog ( LOG_INFO, "Creating Subscription Record for Customer $data[customer]" );
 		$customer = $data ['customer'];
 		$uid = $mod->returnFieldFromTable ( "id", "users", "user_stripe_id='$customer'" );
 		$mod->query ( "UPDATE users SET user_subbegin='$data[current_period_start]', user_subend='$data[current_period_end]', user_status='ACTIVE' WHERE id='$uid'" );
 		break;
-	
+
 	case "charge.refunded" :
 		syslog ( LOG_INFO, "Refunding Invoice for $data[customer]  on invoice $data[invoice]" );
 		break;
-	
+
 	case "charge.succeeded" :
 		$fee = $data ['fee'];
 		$amount =  $data ['amount'];
@@ -63,10 +63,10 @@ switch ($event->type) {
 		$cid = $company['id'];
 		$amt = "$" . @$amount / 100;
 		if (!$data['description']) $data['description'] = "Payment for Invoice: $invoice";
-		
+
 		if (preg_match("/\[/", $data['description']))
 		{
-			// Parse out the ticket. 
+			// Parse out the ticket.
 			$x = end(explode("[", $data['description']));
 			$tid = reset(explode("]", $x));
 		}
@@ -84,19 +84,19 @@ switch ($event->type) {
 		$mod->notifyCompany($company['id'], "Authorization Successful", "$" . number_format($realamount,2). " has been authorized for Ticket #$tid", "/ticket/$tid/");
 		if (preg_match('/in_/', $data['description']))
 			$mod->notifyProvider( "$data[description] Paid", "Settled Charge $" . $realamount . " (-$" . $realfee . ") from $company[company_name]", '/', true, false, $company['id']);
-		else 
-			$mod->notifyProvider( "New Charge Successful", "Settled Charge $" . $realamount . " (-$" . $realfee . ") from $company[company_name]", '/', true, false, $company['id']);
-		$mod->mailCompany($cid, "Payment $".$realamount." Charged to Your Account", "A charge has been applied to your account. The details are below: 
-				
+		else
+			$mod->notifyProvider( "New Charge Successful", "Settled Charge $" . number_format($realamount,2) . " (-$" . number_format($realfee,2) . ") from $company[company_name]", '/', true, false, $company['id']);
+		$mod->mailCompany($cid, "Payment $".$realamount." Charged to Your Account", "A charge has been applied to your account. The details are below:
+
 Type: Credit Credit
 Amount: $ $realamount
 Description: $data[description]
 
 This payment will be listed on your credit card statement as $myCompany.
-				
+
 ");
 		break;
-	
+
 	case "charge.failed" :
 		$customer = $data ['customer'];
 		$company = $mod->query("SELECT * from comanies WHERE company_stripeid='$customer'")[0];
@@ -105,10 +105,10 @@ This payment will be listed on your credit card statement as $myCompany.
 		$mod->log("Card Declined for  $company[company_name] for $amt", "stripeHooks");
 		$mod->notifyProvider( "Charge Failed for $company[company_name]", "Investigate a " . $amt . " failed charge.", '/', true, false, $company['id']);
 		$mod->mailCompany($cid, "Your credit card was declined", "Oops. We tried to bill your card $amt and it was declined. Please login to the support portal and update your credit card details under the billing menu item.
-				
+
 Thank you for your attention in this matter!");
 		break;
-	
+
 	case "customer.subscription.deleted" :
 		syslog ( LOG_INFO, "Cancelling Account for Customer $data[customer]" );
 		$customer = $data ['customer'];
@@ -117,12 +117,12 @@ Thank you for your attention in this matter!");
 		$uid = $mod->returnFieldFromTable ( "id", "users", "user_stripe_id='$customer'" );
 		$name = $mod->getCompanyById($company);
 		$mod->mailProvider("$name Cancellation", $name. " has cancelled their service.");
-		$mod->notifyProvider($name . " has Cancelled", "$name has cancelled their service with whoismy.com", '#', true, false, $company['id']);
+		$mod->notifyProvider($name . " has Cancelled", "$name has cancelled their subscription.", '#', true, false, $company['id']);
 		break;
 
 	case "transfer.created" :
 		$sum = $data->summary;
 		$mod->query("INSERT into transfers SET transfer_amt='$data->amount', transfer_ts='$data->date', transfer_source='stripe'");
-		$mod->notifyProvider( "Pending ACH Transfer on ".date("m/d/y", $data->date), "Gross/Fees: $" . (@$sum->charge_gross / 100) . "-$" . (@$sum->charge_fees/100) . " | Net: $" . ($data->amount / 100), '/admin/', true, true);
+		$mod->notifyProvider( "Pending ACH Transfer on ".date("m/d/y", $data->date), "Gross/Fees: $" . number_format(@$sum->charge_gross / 100,2) . "-$" . number_format(@$sum->charge_fees/100,2) . " | Net: $" . number_format($data->amount / 100,2), '/admin/', true, true);
 		break;
 }
