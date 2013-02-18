@@ -36,7 +36,7 @@ class billing extends core
 	private function billingNav($active)
 	{
 		$opt[$active] = "class='active'";
-	
+
 		// redo this when nav lists are modular
 		$data = "<div class='bs-docs-example'>
 		<div class='well'>
@@ -51,7 +51,7 @@ class billing extends core
 		</div>";
 		return $data;
 	}
-	
+
 	private function stripeDetails()
 	{
 		$cid = $this->company->id;
@@ -72,11 +72,15 @@ class billing extends core
 		$this->exportJs(js::maskInput('card-zip', "99999"));
 		$this->exportJs(js::maskInput('card-expiry-year', "9999"));
 		$form = form::init()->id('payment-form')->post('/billing/')->spanElements($span)->render();
+		if ($this->company->company_stripeid)
+			$form .= base::alert("success", "Credit Card on File", "You currently have a credit card on file with us. If you wish to change it, you may do so above.");
+		else
+			$form .= base::alert("info", "No Credit Card on File", "You currently do not have a credit card on file with us. In order to pay by credit card you will need to fill out the form above.");
 		$data = "<p>You are about to add or update your credit card information. <b>This form will NOT charge your credit card</b>. This is merely updating our merchant with your new card details for monthly subscriptions or billable items.</p>";
 		$saveCC = button::init()->text('Update Credit Card')->icon('arrow-right')->addStyle('savecc')->addStyle('btn-info')->render();
 		if (isset($_GET['newcard']))
 			$pre = base::alert('success', "Card Updated!", "Your new card has been updated and is ready for use!") . $pre;
-		
+
 		$data .= $form;
 		if ($this->company->company_stripeid)
 		{
@@ -94,7 +98,7 @@ class billing extends core
 			}
 			$data .= $pdata . $cancel;
 		}
-		
+
 		$data =  widget::init()->span(8)->header("Update Credit Card")->content($data)->icon('credit-card')->footer($saveCC)->render();
 		return $data;
 	}
@@ -113,24 +117,24 @@ class billing extends core
 				$this->stripe_updateCustomer($content['stripeToken'], $content['cid']);
 				$this->query("UPDATE companies SET company_stripetoken='$content[stripeToken]' WHERE id='{$this->company->id}'");
 			}
-		$this->notifyProvider($this->company->company_name . " updated their Credit Card", "A new credit card was updated in the client's account", "/client/{$this->company->id}/");	
+		$this->notifyProvider($this->company->company_name . " updated their Credit Card", "A new credit card was updated in the client's account", "/client/{$this->company->id}/");
 		$this->reloadTarget("billing/?newcard=yes");
 	}
-	
-	
-	
+
+
+
 	public function main()
 	{
 		// Left Side Nav
 		$nav = $this->billingNav('credit'); // Default to Credit.
 		$data = base::span(4, $nav);
-		// Start with Stripe Configurations. Lets just throw up a span 6 edit update credit card form. 
+		// Start with Stripe Configurations. Lets just throw up a span 6 edit update credit card form.
 		// and a span 6 - current plan form. let's pull the customer record from stripe.
 		$data .= $this->stripeDetails();
 		$data = base::row($data);
 		$this->export($data);
 	}
-	
+
 	public function cancelSubscription()
 	{
 		$cid = $this->company->id;
@@ -150,7 +154,7 @@ class billing extends core
 		else
 			$this->failjson("Unable to Cancel", "Reason: ". $result);
 	}
-	
+
 	public function checkingMain()
 	{
 		$nav = $this->billingNav('checking'); // Default to Credit.
@@ -159,7 +163,7 @@ class billing extends core
 		$data = base::row($data);
 		$this->export($data);
 	}
-	
+
 	private function dwollaAuthorizeOrCreate()
 	{
 		$buttons = button::init()->text("Authorize My Dwolla Account")->url("/dwauth/{$this->company->id}/")->addStyle('btn-success')->icon('ok')->render();
@@ -185,7 +189,7 @@ class billing extends core
 		$fields[] = ['type' => 'input', 'text' => 'Last Name:', 'var' => 'd_last', 'val' => $last];
 		$span[] = ['span' => 4, 'elements' => $fields];
 		$fields = [];
-		
+
 		$fields[] = ['type' => 'input', 'text' => 'Address Line 1:', 'var' => 'd_address1', 'val' => $this->company->company_address];
 		$fields[] = ['type' => 'input', 'text' => 'Address Line 2:', 'var' => 'd_address2', 'val' => $this->company->company_address2];
 		$fields[] = ['type' => 'input', 'text' => 'City:', 'var' => 'd_city', 'val' => $this->company->company_city];
@@ -215,7 +219,7 @@ class billing extends core
 				";
 		return $data;
 	}
-	
+
 	public function createDwollaAccount($content)
 	{
 		if (!$content['d_email'] || !$content['d_password'] || !$content['d_pin'] || !$content['d_first'] || !$content['d_last'] || !$content['d_address1'] || !$content['d_city']
@@ -229,39 +233,39 @@ class billing extends core
 		$Dwolla = new DwollaRestClient($this->getSetting('dwolla_app_key'), $this->getSetting('dwolla_app_secret'), $this->getSetting('atikit_url') . "dwauth/$myid/", null, 'live', true);
 		$terms = ($content['d_terms'] == 'Y') ? true : false;
 		$user = $Dwolla->register(
-				$content['d_email'], 
+				$content['d_email'],
 				$content['d_password'],
-				$content['d_pin'], 
+				$content['d_pin'],
 				$content['d_first'],
 				$content['d_last'],
 				$content['d_address1'],
 				$content['d_city'],
-				$content['d_state'], 
+				$content['d_state'],
 				$content['d_zip'],
-				$content['d_phone'], 
+				$content['d_phone'],
 				$content['d_dob'],
 				$terms,
-				$content['d_address2'], 
+				$content['d_address2'],
 				$content['d_type'],
 				$content['d_org'],
 				$content['d_ein']);
 		$errorMsg = $Dwolla->getError();
-		
-		if(!$user) 
+
+		if(!$user)
 			$this->failJson("Unable to Create", $errorMsg);
 		$json = [];
 		$json['action'] = 'reload';
 		$json['url'] = "/dwauth/{$this->company->id}/";
 		$this->jsone('success', $json);
 	}
-	
+
 	private function dwollaMain()
 	{
 		// Do we have an authorized Dwolla Account? If no, then display a hero-like unit with two options. Create Account or Authorize Your Account
 		if (!$this->company->company_dwollatoken)
 		{
 			return $this->dwollaAuthorizeOrCreate();
-			
+
 		}
 		$myid = $this->company->id;
 		$Dwolla = new DwollaRestClient($this->getSetting('dwolla_app_key'), $this->getSetting('dwolla_app_secret'), $this->getSetting('atikit_url') . "dwauth/$myid/");
@@ -289,10 +293,10 @@ class billing extends core
 		$table .= base::alert('info', "Removing Accounts", "If you wish to remove your bank account from Dwolla, you must login to dwolla.com and remove.");
 		return widget::init()->header('Funding Sources')->content($table)->span(8)->rightHeader($add)->isTable()->render();
 	}
-	
+
 	private function addBankAccountForm()
 	{
-		$pre = "<p>You are adding a bank account to your dwolla.com account. You will be able to draft payments from this account to pay any invoices you may have. Please note that we do 
+		$pre = "<p>You are adding a bank account to your dwolla.com account. You will be able to draft payments from this account to pay any invoices you may have. Please note that we do
 				not store this information on our servers. Credit and Checking account information is stored with the respective merchant; in this case Dwolla.com</p>";
 		$span = [];
 		$fields = [];
@@ -305,9 +309,9 @@ class billing extends core
 		$fields[] = ['type' => 'input', 'text' => 'Nickname:', 'comment' => '(i.e. Chase Checking Account)', 'var' => 'nickname'];
 		$span[] = ['span' => 6, 'elements' => $fields];
 		$form = form::init()->post('/billing/')->id('addAccountForm')->spanelements($span)->render();
-		return $pre.$form;  
+		return $pre.$form;
 	}
-	
+
 	public function addBankAccount($content)
 	{
 		if (!$content['routing'] || !$content['account'] || !$content['type'] || !$content['nickname'])
@@ -328,7 +332,7 @@ class billing extends core
 	{
 		$nav = $this->billingNav('invoices'); // Default to Credit.
 		$data = base::span(4, $nav);
-		//Just a simple table with a download button for downloading the invoices. 
+		//Just a simple table with a download button for downloading the invoices.
 		$headers = ['Ticket', 'Date', 'Description', 'Type', 'Download'];
 		$rows = [];
 		$transactions = $this->query("SELECT * from transactions WHERE company_id='{$this->company->id}'");
@@ -349,12 +353,12 @@ class billing extends core
 			];
 			$rows[] = $row;
 		}
-		$table = table::init()->rows($rows)->headers($headers)->render();		
+		$table = table::init()->rows($rows)->headers($headers)->render();
 		$data .= widget::init()->span(8)->isTable()->header("Processed Transactions")->content($table)->render();
 		$data = base::row($data);
 		$this->export($data);
 	}
-	
+
 	public function downloadInvoice($content)
 	{
 		$id = $content['downloadInvoice'];
@@ -367,7 +371,7 @@ class billing extends core
 		$this->ajax = true;
 		$this->createPDFInvoice($transaction, true, $transactions);
 	}
-	
+
 }
 
 
