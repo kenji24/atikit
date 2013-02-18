@@ -51,7 +51,7 @@ class ticket extends core
 	private function getTicketReplies(&$ticket)
 	{
 		$private = ($this->isProvidingCompany()) ? null : "AND reply_isinternal = false";
-		$pre = "<img src='/assets/img/talking.png' width='90px' align='left' style='padding-right:10px'><div class='well'><p>$ticket[ticket_body]</p></div>";
+		$pre = "<img src='/assets/img/talking.png' width='90px' align='left' style='padding-right:10px'><div class='well'><p>".nl2br($ticket['ticket_body'])."</p></div>";
 
 
 		$replies = $this->query("SELECT * from replies WHERE ticket_id='$ticket[id]' {$private} ORDER by reply_ts ASC");
