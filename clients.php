@@ -161,7 +161,7 @@ If you have any questions please feel free to email $defaultEmail");
 				if (!$plan)
 					$plandata = "No Subscription";
 				else
-					$plandata = "$plan[plan_name] ($plan[plan_amount])";
+					$plandata = "$plan[plan_name] ($".number_format($plan['plan_amount'],2).")";
 
 				$ttl = 0;
 				$transactions = $this->query("SELECT transaction_ts,transaction_amount FROM transactions WHERE company_id='$company[id]'");
