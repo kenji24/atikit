@@ -48,7 +48,7 @@ switch ($event->type) {
 		$cid = $mod->returnFieldFromTable ( "id", "companies", "company_stripeid='$customer'" );
 		$cname = $mod->returnFieldFromTable("company_name", "companies", "id='$cid'");
 		$mod->query ( "UPDATE users SET company_planbegin='$data[current_period_start]', company_planend='$data[current_period_end]' WHERE id='$cid'" );
-		$mod->notifyProvider("Subscription Renewed", $cname . "'s subscription has been renewed or started.", "/client/$cid/", true, false, $cid);
+		$mod->notifyProvider("Subscription Renewed", $cname . " subscription has been renewed or started.", "/client/$cid/", true, false, $cid);
 		break;
 
 	case "charge.refunded" :
