@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.29, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.30, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: shell
 -- ------------------------------------------------------
--- Server version	5.5.29-0ubuntu0.12.10.1
+-- Server version	5.5.30-1~dotdeb.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -40,6 +40,8 @@ CREATE TABLE `companies` (
   `company_phone` varchar(20) DEFAULT NULL,
   `company_vip` tinyint(1) DEFAULT '0',
   `company_since` bigint(20) DEFAULT NULL,
+  `company_planbegin` bigint(20) DEFAULT NULL,
+  `company_planend` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -475,4 +477,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-13 17:22:33
+-- Dump completed on 2013-02-17 19:13:46
