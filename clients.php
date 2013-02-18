@@ -209,7 +209,7 @@ If you have any questions please feel free to email $defaultEmail");
 		$elements[] = ['type' => 'input', 'var' => 'user_phone', 'text' => 'Phone Number (and Extension):', 'comment' => 'xxx.xxx.xxxx ext. xxx', 'val' => $user['user_phone']];
 		$elements[] = ['type' => 'input', 'var' => 'user_title', 'text' => 'Title:', 'comment' => 'Leave blank if individual', 'val' => $user['user_title']];
 		$span = [];
-		$span[] = ['span' => 6, 'elements' => $elements];
+		$span[] = ['span' => 4, 'elements' => $elements];
 		$elements = [];
 		$elements[] = ['type' => 'input', 'var' => 'company_name', 'text' => 'Company Name:', 'comment' => 'If individual leave this blank', 'val' => $company['company_name']];
 		$elements[] = ['type' => 'input', 'var' => 'company_address', 'text' => 'Address:', 'comment' => 'Where to mail invoices if required?', 'val' => $company['company_address']];
@@ -217,7 +217,14 @@ If you have any questions please feel free to email $defaultEmail");
 		$elements[] = ['type' => 'input', 'var' => 'company_city', 'text' => 'City:', 'val' => $company['company_city']];
 		$elements[] = ['type' => 'input', 'var' => 'company_state', 'text' => 'State:', 'class' => 'state', 'val' => $company['company_state']];
 		$elements[] = ['type' => 'input', 'var' => 'company_zip', 'text' => 'Zip:', 'val' => $company['company_zip']];
-		$span[] = ['span' => 6, 'elements' => $elements];
+		$span[] = ['span' => 4, 'elements' => $elements];
+		$elements = [];
+		$elements[] = ['type' => 'textarea', 'rows'=> 15, 'var' => 'company_notes', 'text' => 'Company Notes:', 'val' => $company['company_notes']];
+		$checked = ($company['company_vip']) ? true : false;
+		$opts = [['val' => 'Y', 'text' => 'Company is VIP?', 'checked' => $checked]];
+		$elements[] = ['type' => 'checkbox', 'var' => 'company_vip', 'opts' => $opts];
+		$span[] = ['span' => 4, 'elements' => $elements];
+
 		$form = form::init()->spanElements($span)->id('editAccount')->post('/clients/')->render();
 		$button = button::init()->formid('editAccount')->text('Edit Account')->addStyle('post')->addStyle('btn-primary')->icon('fire')->message('Modifying Account..')->postVar('editAccount')->id($company['id'])->render();
 		$save = "<div class='pull-right'>$button</div>";
@@ -229,11 +236,12 @@ If you have any questions please feel free to email $defaultEmail");
 	public function editClient($content)
 	{
 		$id = $content['editAccount'];
+		$checked = ($content['company_vip'] == 'Y') ? 'true' : 'false';
 		$uid = $this->returnFieldFromTable("id", "users", "company_id='$id'");
 		$this->query("UPDATE users SET user_name='$content[user_name]', user_email='$content[user_email]', user_phone='$content[user_phone]',
 				user_title='$content[user_title]' WHERE id='$uid'");
 
-		$this->query("UPDATE companies SET company_phone='$content[user_phone]', company_name='$content[company_name]', company_address='$content[company_address]', company_address2='$content[company_address2]',
+		$this->query("UPDATE companies SET company_phone='$content[user_phone]', company_notes='$content[company_notes]', company_vip=$checked, company_name='$content[company_name]', company_address='$content[company_address]', company_address2='$content[company_address2]',
 				company_city='$content[company_city]', company_state='$content[company_state]', company_zip='$content[company_zip]' WHERE id='$id'");
 		$json = [];
 		$json['action'] = 'reload';
