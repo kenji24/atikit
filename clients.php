@@ -142,7 +142,7 @@ If you have any questions please feel free to email $defaultEmail");
 			$headers = array_merge($headers, $billing);
 		}
 		$rows = [];
-		$companies = $this->query("SELECT * from companies ORDER by company_since DESC");
+		$companies = $this->query("SELECT * from companies WHERE company_isprovider = false ORDER by company_since DESC");
 		foreach ($companies AS $company)
 		{
 			$tcontent = null;
@@ -170,7 +170,7 @@ If you have any questions please feel free to email $defaultEmail");
 				$totals[3] += $ttl;
 				$ttl = "$" . number_format($ttl,2);
 				$m = $this->getQTotals($transactions);
-				$new = [$plandata, number_format($m[2],2), number_format($m[1],2), number_format($m[0],2), $ttl];
+				$new = [$plandata, "$".number_format($m[2],2), "$".number_format($m[1],2), "$".number_format($m[0],2), $ttl];
 				$row = array_merge($row, $new);
 				$totals[0] += $m[0];
 				$totals[1] += $m[1];
