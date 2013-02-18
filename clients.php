@@ -3,25 +3,25 @@ require_once("classes/core.inc.php");
 
 class clients extends core
 {
-	
+
 	public function __construct()
 	{
 		parent::__construct();
 		if (!$this->isProvidingCompany())		// Only accessible by provider
 			$this->reloadTarget();
-		
+
 		$data = base::subHeader("Client List", "View/Create/List Clients");
 		$data .= base::begin();
 		$this->export($data);
 	}
-	
+
 	public function main()
 	{
 		$this->listClients();
-		
+
 	}
-	
-	
+
+
 	public function createClient()
 	{
 		// Going to pretty much copy the end-user signup form.
@@ -48,7 +48,7 @@ class clients extends core
 		$this->exportJS(js::maskInput('state', "**"));
 		$this->export($data);
 	}
-	
+
 	public function createAccount($content)
 	{
 		$exists = $this->returnCountFromTable("users", "user_email='$content[user_email]'");
@@ -73,23 +73,23 @@ class clients extends core
 				company_city='$content[company_city]', company_state='$content[company_state]', company_zip='$content[company_zip]', company_admin='$uid'");
 		$cid = $this->insert_id;
 		$this->query("UPDATE users SET company_id='$cid' WHERE id='$uid'"); // Assign the company to that user.
-	
-			
+
+
 		// In the admin side we want to notify customers they have an account vs on the login
 		// page where we just notified the company.
 		$weare = $this->getSetting("mycompany");
 		$url = $this->getSetting("atikit_url");
 		$defaultEmail = $this->getSetting("defaultEmail");
-		$this->mailCompany($cid, "New Account Created with {$weare}", 
+		$this->mailCompany($cid, "New Account Created with {$weare}",
 "This email is to inform you that you have been created a new account on the support system, aTikit, currently used by {$weare}. Here are the details to your new account!
 
 URL/Link: $url
 E-mail Address: $content[user_email]
 Password: $content[user_password]
 
-You can login and change your password by going to the options menu and clicking My Profile. 
+You can login and change your password by going to the options menu and clicking My Profile.
 If you have any questions please feel free to email $defaultEmail");
-		
+
 		$json = [];
 		$json['gtitle'] = 'Account Created';
 		$json['gbody'] = 'New Client Account has been created.';
@@ -97,20 +97,51 @@ If you have any questions please feel free to email $defaultEmail");
 		$json['url'] = '/clients/';
 		$this->jsone('success', $json);
 	}
-	
+
+	private function getQTotals(&$transactions)
+	{
+		$result = [];
+		for ($i=0; $i<=2; $i++)
+		{
+			if ($i == 0)
+			{
+				$sts = strtotime(date("F"). " 1");	//Should be start of this month. Translates "Februrary 1";
+				$month = date("m", $sts);
+				$year = date("y", $sts);
+				$num = cal_days_in_month(CAL_GREGORIAN, $month, $year)-1;
+				$ets = ($sts + ($num * 86400)); // 1 second behind how many days in that month times seconds in a day..
+			}
+			else
+			{
+				$sts = strtotime("-{$i} months"); // Gives a ts for X months from today.. what month is that?
+				$month = date("m", $sts);
+				$year = date("y", $sts);
+				$num = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+				$sts = strtotime($month . "/" . '1'. "/" . $year);
+				$ets = ($sts + ($num * 86400))-1; // 1 second behind how many days in that month times seconds in a day..
+			}
+			$result[$i] = 0;
+			foreach($transactions AS $transaction)
+				if ($transaction['transaction_ts'] > $sts AND $transaction['transaction_ts'] < $ets)
+					$result[$i] += $transaction['transaction_amount'];
+		}
+		return $result;
+	}
+
 	public function listClients()
 	{
-		// At a glance - Let's view the client's basic info, If you can see billing, then show subscription
-		// and show total amount collected.  Put in a datatable so we can search.
-		$headers = ["Client", "Address", "VIP", "Tickets"];
+		// Subscription, 3 Months ago, 2 months ago, this month, total
+		$headers = ["Client", "VIP", "Tickets"];
+		$month3 = date("F", strtotime("-2 Months")); // Don't hate.
+		$month2 = date("F", strtotime("-1 Months")); // I know this is dumb.
+		$thisMonth = date("F");
+		$totals = [];
 		if ($this->canSeeBilling())
 		{
-			$billing = ['Subscription', 'Total Income'];
+			$billing = ['Subscription', $month3, $month2, $thisMonth, 'Total Income'];
 			$headers = array_merge($headers, $billing);
-		}		
-		
+		}
 		$rows = [];
-		
 		$companies = $this->query("SELECT * from companies ORDER by company_since DESC");
 		foreach ($companies AS $company)
 		{
@@ -120,39 +151,51 @@ If you have any questions please feel free to email $defaultEmail");
 				$tcontent .= "<a href='/ticket/$tick[id]/'>$tick[ticket_title]</a><br/>";
 			$ticketblock = base::popover("Ticket History", $tcontent, 'right');
 			$row = ["<a href='/client/$company[id]/'>$company[company_name]</a>",
-					"$company[company_address], $company[company_city], $company[company_state]",
 					($company['company_vip']) ? "Yes" : "No",
 					"<a href='#' $ticketblock>".$this->returnCountFromTable("tickets", "company_id='$company[id]'")."</a>"
-					
+
 			];
 			if ($this->canSeeBilling())
 			{
 				$plan = $this->query("SELECT * from plans WHERE id='$company[company_plan]'", true)[0];
-				if (!$plan) 
+				if (!$plan)
 					$plandata = "No Subscription";
 				else
 					$plandata = "$plan[plan_name] ($plan[plan_amount])";
-				
+
 				$ttl = 0;
-				$transactions = $this->query("SELECT transaction_amount FROM transactions WHERE company_id='$company[id]'");
+				$transactions = $this->query("SELECT transaction_ts,transaction_amount FROM transactions WHERE company_id='$company[id]'");
 				foreach ($transactions AS $transaction)
 					$ttl += $transaction['transaction_amount'];
+				$totals[3] += $ttl;
 				$ttl = "$" . number_format($ttl,2);
-				$new = [$plandata, $ttl];
+				$m = $this->getQTotals($transactions);
+				$new = [$plandata, number_format($m[2],2), number_format($m[1],2), number_format($m[0],2), $ttl];
 				$row = array_merge($row, $new);
-			}
+				$totals[0] += $m[0];
+				$totals[1] += $m[1];
+				$totals[2] += $m[2];
+
+ 			}
 			$rows[] = $row;
-			
-			
 		}
+		if ($this->canSeeBilling())
+			$rows[] = [null, null, null, "<span class='pull-right'><b>Totals:</b></span>",
+				"$". number_format($totals[2],2),
+				"$". number_format($totals[1],2),
+				"$". number_format($totals[0],2),
+				"$". number_format($totals[3],2),
+				'green'
+
+				];
 		$this->exportJS(js::datatable('clientList'));
 		$addButton = button::init()->text("Add Account")->icon('plus')->addStyle('btn-success')->url('/clients/create/')->render();
 		$table = table::init()->headers($headers)->rows($rows)->id('clientList')->render();
 		$widget = widget::init()->header("Customer List")->content($table)->isTable()->icon('user')->rightHeader($addButton)->render();
 		$this->export(base::row($widget));
-		
+
 	}
-	
+
 	public function showClient($content)
 	{
 		$id = $content['showClient'];
@@ -182,14 +225,14 @@ If you have any questions please feel free to email $defaultEmail");
 		$this->exportJS(js::maskInput('state', "**"));
 		$this->export($data);
 	}
-	
+
 	public function editClient($content)
 	{
 		$id = $content['editAccount'];
 		$uid = $this->returnFieldFromTable("id", "users", "company_id='$id'");
-		$this->query("UPDATE users SET user_name='$content[user_name]', user_email='$content[user_email]', user_phone='$content[user_phone]', 
+		$this->query("UPDATE users SET user_name='$content[user_name]', user_email='$content[user_email]', user_phone='$content[user_phone]',
 				user_title='$content[user_title]' WHERE id='$uid'");
-		
+
 		$this->query("UPDATE companies SET company_phone='$content[user_phone]', company_name='$content[company_name]', company_address='$content[company_address]', company_address2='$content[company_address2]',
 				company_city='$content[company_city]', company_state='$content[company_state]', company_zip='$content[company_zip]' WHERE id='$id'");
 		$json = [];
