@@ -45,12 +45,17 @@ switch ($event->type) {
 	case "customer.subscription.created" :
 		syslog ( LOG_INFO, "Creating Subscription Record for Customer $data[customer]" );
 		$customer = $data ['customer'];
-		$uid = $mod->returnFieldFromTable ( "id", "users", "user_stripe_id='$customer'" );
-		$mod->query ( "UPDATE users SET user_subbegin='$data[current_period_start]', user_subend='$data[current_period_end]', user_status='ACTIVE' WHERE id='$uid'" );
+		$cid = $mod->returnFieldFromTable ( "id", "companies", "company_stripeid='$customer'" );
+		$cname = $mod->returnFieldFromTable("company_name", "companies", "id='$cid'");
+		$mod->query ( "UPDATE users SET company_planbegin='$data[current_period_start]', company_planend='$data[current_period_end]' WHERE id='$cid'" );
+		$mod->notifyProvider("Subscription Renewed", $cname . "'s subscription has been renewed or started.", "/client/$cid/", true, false, $cid);
 		break;
 
 	case "charge.refunded" :
-		syslog ( LOG_INFO, "Refunding Invoice for $data[customer]  on invoice $data[invoice]" );
+		$customer = $data ['customer'];
+		$cid = $mod->returnFieldFromTable ( "id", "companies", "company_stripeid='$customer'" );
+		$cname = $mod->returnFieldFromTable("company_name", "companies", "id='$cid'");
+		$mod->notifyProvider("Refunded Charge", "A refund in the amount of $".number_format($data['amount']/100,2). " was issued to the credit card.", true, false, $cid);
 		break;
 
 	case "charge.succeeded" :
