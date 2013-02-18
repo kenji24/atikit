@@ -93,7 +93,7 @@ switch ($event->type) {
 			$mod->notifyProvider( "New Charge Successful", "Settled Charge $" . number_format($realamount,2) . " (-$" . number_format($realfee,2) . ") from $company[company_name]", '/', true, false, $company['id']);
 		$mod->mailCompany($cid, "Payment $".$realamount." Charged to Your Account", "A charge has been applied to your account. The details are below:
 
-Type: Credit Credit
+Type: Credit Card
 Amount: $ $realamount
 Description: $data[description]
 
