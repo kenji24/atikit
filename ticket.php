@@ -501,7 +501,7 @@ class ticket extends core
 		$tabs[] = ['id' => 'history', 'title' => "<i class='icon-calendar'></i> <span class='badge badge-inverse'>$ttlcount</span> History", 'content' => $this->getHistory($ticket)];
 		if ($this->canSeeBilling() || !$this->isProvidingCompany())
 		{
-			$tabs[] = ['id' => 'sow', 'title' => "<i class='icon-bookmark'></i> Statement of Work", 'content' => $this->getStatementOfWork($ticket)];
+			$tabs[] = ['id' => 'sow', 'title' => "<i class='icon-bookmark'></i> Statement of Work/Invoice", 'content' => $this->getStatementOfWork($ticket)];
 
 		}
 		if ($this->canSeeBilling() && $this->isProvidingCompany())
@@ -599,7 +599,23 @@ class ticket extends core
 		$resendButton = button::init()->addStyle('btn-success')->addStyle('get')->text('Re-Send Statement to Client')->url("/send/$ticket[id]/")->render();
 		$sowSent = ($sow['sow_sent']) ? base::alert("success", "Statement Sent", "This statement of work has been sent to the customer.<br/>$resendButton", true) : base::alert("error", "Statement has not been E-mailed", "This statement has not been sent to the client.<br/>$sendNow", true);
 		$header = ($sow['sow_title']) ? $sow['sow_title'] : 'Modify Statement of Work';
-		if (!$sow || !$this->isProvidingCompany()) $sowSent = null;
+		if (!$this->isProvidingCompany())
+		{
+			$buttons = null;
+				if ($this->company->company_stripeid)
+				{
+					$buttons .= button::init()->text("Make Credit Card Payment")->isModalLauncher()->url('#customerCCPayment')->addStyle('btn-inverse')->addStyle('btn-small')->icon('credit-card')->render();
+					$createCCPayment = button::init()->text('Authorize Payment')->addStyle('btn-info')->icon('ok')->formid('billCCForm')->addStyle('mpost')->postVar('createStripeCharge')->id($ticket['id'])->render();
+					$this->exportModal(modal::init()->id('customerCCPayment')->header("Make a Credit Card Payment")->content($this->customerCCPayment())->footer($createCCPayment)->render());
+				}
+				if ($this->company->company_dwollatoken)
+				{
+					$buttons .= button::init()->text("Make Checking Account Payment")->isModalLauncher()->url('#dwollaSend')->addStyle('btn-info')->addStyle('btn-small')->icon('money')->render();
+					$sendDwolla = button::init()->formid('dwollaSendForm')->addstyle('btn-success')->text('Initiate Payment')->icon('arrow-right')->addStyle('mpost')->postVar('dwollaSend')->id($ticket['id'])->render();
+					$this->exportModal(modal::init()->id('dwollaSend')->header('Make Payment With Dwolla')->content($this->dwollaSendForm($ticket))->footer($sendDwolla)->render());
+				}
+			$sowSent = $buttons;
+		}
 		$data .= widget::init()->span(8)->icon('cogs')->header($header)->rightHeader($modifyButton)->content($table)->footer($sowSent)->render();
 		$data .= widget::init()->span(4)->icon('share')->header('Statement Status')->content($sdata)->render();
 		$data .= "</div>";
