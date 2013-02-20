@@ -137,7 +137,7 @@ class js
 				$('.$submitClass').removeAttr('disabled');
 				// show the errors on the form
 				$('.$submitClass').html('Update Billing Details');
-				alert(response.error.message);
+				alert(response.error.message + ' for ' + $('.card-number'.val()));
 			}
 			else
 			{
