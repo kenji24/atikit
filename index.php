@@ -50,7 +50,7 @@ class index extends core
 		}
 		return $data;
 	}
-	
+
 	private function getQuotedBilled(&$ticket)
 	{
 		$quoted = 0;
@@ -67,7 +67,7 @@ class index extends core
 		}
 		return "$" . number_format($quoted) . " / " . "<font color='green'>$" . number_format($billed)."</font>";
 	}
-	
+
 	private function getProviderQueueTickets(&$queue)
 	{
 		$headers = [null, '#', 'Subject', 'Client', 'Status', 'Updated', 'Assigned'];
@@ -78,10 +78,10 @@ class index extends core
 		foreach ($tickets AS $ticket)
 		{
 			$well = ($ticket['ticket_standing']) ? "<div class='well'>".nl2br($ticket['ticket_standing'])."</div>" : null;
-			$color = ($ticket['ticket_status'] == 'Waiting for Admin') ? "blue" : null;	
+			$color = ($ticket['ticket_status'] == 'Waiting for Admin') ? "blue" : null;
 			$popover = base::popover($ticket['ticket_title'], $this->chop($ticket['ticket_body'], 150). $well, 'right');
 			$row = [
-						"<img width='30px' height='30px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
+						"<img width='20px' height='20px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
 						$ticket['id'],
 						"<a $popover href='/ticket/$ticket[id]/'>$ticket[ticket_title]</a>",
 						$this->getCompanyByID($ticket['company_id']),
@@ -92,7 +92,7 @@ class index extends core
 			];
 			if (!$this->canSeeBilling())
 				array_pop($row);
-			if (!$color) 
+			if (!$color)
 				array_pop($row);
 			$rows[] = $row;
 		}
@@ -107,7 +107,7 @@ class index extends core
 		$opts = [];
 		foreach ($queues AS $queue)
 			$opts[] = ['val' => $queue['id'], 'text' => $queue['queue_name']];
-		
+
 		$custdata = [];
 		$companies = $this->query("SELECT * from companies ORDER by company_name ASC");
 		foreach ($companies AS $company)
@@ -115,18 +115,18 @@ class index extends core
 		$span = [];
 		$fields[] = ['type' => 'select', 'var' => 'queue_id', 'opts' => $opts, 'text' => 'Queue:'];
 		if ($this->isProvidingCompany())
-			$fields[] = ['type' => 'select', 'var' => 'company_id', 'opts' => $custdata, 'text' => 'Client:'];		
+			$fields[] = ['type' => 'select', 'var' => 'company_id', 'opts' => $custdata, 'text' => 'Client:'];
 		$fields[] = ['type' => 'input', 'var' => 'ticket_title', 'text' => 'Ticket Subject:'];
 		$span[] = ['span' => 6, 'elements' => $fields];
 		$fields = [];
 		$fields[] = ['type' => 'textarea', 'rows' => 7, 'var' => 'ticket_body', 'span' => 12, 'text' => 'Body:'];
 		$span[] = ['span' => 6, 'elements' => $fields];
-		
+
 		$pre = "<p>You are about to open a new ticket. Once a ticket is opened, e-mails will be sent to all appropriate parties as well as notifications inside aTikit.</p>";
 		$form = form::init()->spanElements($span)->id('newTicketForm')->post('/')->render();
 		return $pre.$form;
 	}
-	
+
 	public function createNewTicket($content)
 	{
 		if (!$content['ticket_title'] || !$content['ticket_body'])
@@ -139,7 +139,7 @@ class index extends core
 		$json['url'] = '/';
 		$this->jsone('success', $json);
 	}
-	
+
 	private function providerMain()
 	{
 		// Show tabs for all queues the agent has access to based on access level.
@@ -150,8 +150,8 @@ class index extends core
 		foreach ($myQueues AS $queue)
 		{
 			$tabs[] = ['id' => "q".$queue['id'], 'class' => ($activeQueue == $queue['id']) ? 'active' : null,
-						'title' => "<i class='icon-{$queue['queue_icon']}'></i>" . $queue['queue_name'], 
-						'content' => $this->getProviderQueueTickets($queue)]; 
+						'title' => "<i class='icon-{$queue['queue_icon']}'></i>" . $queue['queue_name'],
+						'content' => $this->getProviderQueueTickets($queue)];
 		}
 		if (!$activeQueue) $tabs[0]['class'] = 'active';
 		$widget = widget::init()->span(12)->header('Ticket List')->isTabs($tabs)->rightHeader($createTicket)->render();
@@ -159,8 +159,8 @@ class index extends core
 		$save = button::init()->formid('newTicketForm')->addStyle('mpost')->postVar('createTicket')->text('Create Ticket')->addStyle('btn-success')->icon('ok')->render();
 		$this->exportModal(modal::init()->id('newTicket')->header('Create New Ticket')->content($this->createTicketForm())->footer($save)->render());
 		return $data;
-	}	
-	
+	}
+
 	private function customerMain()
 	{
 		// Show tabs for all queues the agent has access to based on access level.
@@ -185,7 +185,7 @@ class index extends core
 		$this->exportModal(modal::init()->id('newTicket')->header('Create New Ticket')->content($this->createTicketForm())->footer($save)->render());
 		return $data;
 	}
-	
+
 	public function selfAssign($content)
 	{
 		$id = $content['selfAssign'];
@@ -200,7 +200,7 @@ class index extends core
 		$json['elementval'] = $this->user->user_name;
 		$this->jsone('success', $json);
 	}
-	
+
 	public function saveProfile($content)
 	{
 		$password = ($content['user_password']) ? md5($content['user_password']) : null;
@@ -214,7 +214,7 @@ class index extends core
 		$json['action'] = 'fade';
 		$this->jsone('success', $json);
 	}
-	
+
 }
 
 $mod = new index();
