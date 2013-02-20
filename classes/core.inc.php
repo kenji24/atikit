@@ -540,6 +540,26 @@ reply to this email to post any updates to the ticket.");
 			$img->writeImage($file);
 			$this->query("UPDATE users SET user_pic='$file' WHERE id='{$this->user->id}'");
 		}
+		
+		if (preg_match('/logo_/i', $code))
+		{
+			// Admin Logo Upload (Mimic ProfilePic Code)
+			$cid = end(explode("_", $code));
+			$uid = $this->returnFieldFromTable("id", "users", "company_id='$cid'");
+			$ext = end(explode(".", $loc));
+			rename (config::AJAX_UPLOAD_FOLDER. "/". $loc, "files/{$uid}.$ext");
+			$now = time();
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+			$type = finfo_file($finfo, "files/{$uid}.$ext");
+			if (!preg_match("/image/i", $type))
+				return null;
+			$file = "files/{$uid}.$ext";
+			$img = new Imagick ($file);
+			$img->scaleImage( 50, 50, false);
+			$img->writeImage($file);
+			$this->query("UPDATE users SET user_pic='$file' WHERE id='$uid'");
+		}
+		
 	}
 	
 	public function getProfilePic($uid)

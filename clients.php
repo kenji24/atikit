@@ -202,6 +202,7 @@ If you have any questions please feel free to email $defaultEmail");
 		$company = $this->query("SELECT * from companies WHERE id='$id'")[0];
 		$user = $this->query("SELECT * from users WHERE company_id='$company[id]'")[0];
 		// Going to pretty much copy the end-user signup form. (and change our postvars)
+		$pic = $this->getProfilePic($user['id']);
 		$elements = [];
 		$elements[] = ['type' => 'input', 'var' => 'user_name', 'text' => 'Full Name:', 'comment' => 'Main contact for account', 'val' => $user['user_name']];
 		$elements[] = ['type' => 'input', 'var' => 'user_email', 'text' => 'E-mail Address:', 'comment' => 'Also your login to this system', 'val' => $user['user_email']];
@@ -223,6 +224,7 @@ If you have any questions please feel free to email $defaultEmail");
 		$checked = ($company['company_vip']) ? true : false;
 		$opts = [['val' => 'Y', 'text' => 'Company is VIP?', 'checked' => $checked]];
 		$elements[] = ['type' => 'checkbox', 'var' => 'company_vip', 'opts' => $opts];
+		$elements[] = ['type' => 'ajax', 'id' => 'logoUpload', 'text' => "Company Logo:<br/><img src='$pic'>"];
 		$span[] = ['span' => 4, 'elements' => $elements];
 
 		$form = form::init()->spanElements($span)->id('editAccount')->post('/clients/')->render();
@@ -230,6 +232,7 @@ If you have any questions please feel free to email $defaultEmail");
 		$save = "<div class='pull-right'>$button</div>";
 		$data .= widget::init()->icon('share-alt')->span(12)->header('Account Details')->content($form)->footer($save)->render();
 		$this->exportJS(js::maskInput('state', "**"));
+		$this->exportJS(js::ajaxFile('logoUpload', "logo_$id"));
 		$this->export($data);
 	}
 
