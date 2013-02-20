@@ -37,7 +37,7 @@ class admin extends core
 
 	private function adminNav($active)
 	{
-		$fields = [['type' => 'ajax', 'id' => 'logoUpload', 'text' => 'Invoice Logo (MUST BE PNG)']];
+		$fields = [['type' => 'ajax', 'id' => 'logoUpload', 'text' => 'Invoice Logo (MUST BE PNG)', 'comment' => 'Will be resized to 568x271']];
 		$form = form::init()->post('/admin/')->id('logoForm')->elements($fields)->render();
 		$this->exportJS(js::ajaxFile('logoUpload', 'invoiceLogo'));		
 		$opt[$active] = "class='active'";
