@@ -224,7 +224,7 @@ If you have any questions please feel free to email $defaultEmail");
 		$checked = ($company['company_vip']) ? true : false;
 		$opts = [['val' => 'Y', 'text' => 'Company is VIP?', 'checked' => $checked]];
 		$elements[] = ['type' => 'checkbox', 'var' => 'company_vip', 'opts' => $opts];
-		$elements[] = ['type' => 'ajax', 'id' => 'logoUpload', 'text' => "Company Logo:<br/><img src='$pic'>"];
+		$elements[] = ['type' => 'ajax', 'id' => 'logoUpload', 'text' => "Company Logo:<br/><img src='/$pic'>"];
 		$span[] = ['span' => 4, 'elements' => $elements];
 
 		$form = form::init()->spanElements($span)->id('editAccount')->post('/clients/')->render();
