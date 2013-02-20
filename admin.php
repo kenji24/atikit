@@ -37,6 +37,9 @@ class admin extends core
 
 	private function adminNav($active)
 	{
+		$fields = [['type' => 'ajax', 'id' => 'logoUpload', 'text' => 'Invoice Logo (MUST BE PNG)']];
+		$form = form::init()->post('/admin/')->id('logoForm')->elements($fields)->render();
+		$this->exportJS(js::ajaxFile('logoUpload', 'invoiceLogo'));		
 		$opt[$active] = "class='active'";
 		// redo this when nav lists are done through a helper - and not this crap
 		$data = "<div class='bs-docs-example'>
@@ -53,7 +56,8 @@ class admin extends core
 							</ul>
 						</div>
 						<!-- /well -->
-					</div>";
+						$form <img width='100px' src='/files/logo.png'>
+						</div>";
 		return $data;
 	}
 

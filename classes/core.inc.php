@@ -567,6 +567,19 @@ reply to this email to post any updates to the ticket.");
 			$this->query("UPDATE users SET user_pic='$file' WHERE id='$uid'");
 		}
 		
+		if ($code == 'invoiceLogo')
+		{
+			$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+			$type = finfo_file($finfo, config::AJAX_UPLOAD_FOLDER. "/".$loc);
+			if (!preg_match("/png/i", $type))
+				return null;
+			rename (config::AJAX_UPLOAD_FOLDER. "/". $loc, "files/logo.png");
+			$file = "files/logo.png";
+			$img = new Imagick ($file); //568x271
+			$img->scaleImage( 568, 271, false);
+			$img->writeImage($file);
+		}
+		
 	}
 	
 	public function getProfilePic($uid)
@@ -601,7 +614,7 @@ reply to this email to post any updates to the ticket.");
 				"$company[company_address]\n" . "$company[company_address2]\n".
 				"$company[company_city], $company[company_state]. $company[company_zip]\n".
 				"$company[company_phone]\n",
-				$this->getSetting("company_logo"));
+				"files/logo.png");
 		$pdf->fact_dev($transaction['id'] );
 		$pdf->temporaire( "Posted Invoice" );
 		$pdf->addDate( date("m/d/y", $transaction['transaction_ts']));
@@ -710,7 +723,7 @@ reply to this email to post any updates to the ticket.");
 				"$company[company_address]\n" . "$company[company_address2]\n".
 				"$company[company_city], $company[company_state]. $company[company_zip]\n".
 				"$company[company_phone]\n",
-				$this->getSetting("company_logo"));
+			 	"files/logo.png");
 		$pdf->fact_dev($sow['id'] );
 		$pdf->temporaire( "Statement of Work" );
 		$pdf->addDate( date("m/d/y", $sow['sow_updated']));
