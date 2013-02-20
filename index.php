@@ -70,7 +70,7 @@ class index extends core
 	
 	private function getProviderQueueTickets(&$queue)
 	{
-		$headers = [null, '#', 'Client', 'Subject', 'Status', 'Updated', 'Assigned'];
+		$headers = [null, '#', 'Subject', 'Client', 'Status', 'Updated', 'Assigned'];
 		if ($this->canSeeBilling())
 			$headers[] = 'Quoted/Billed';
 		$tickets = $this->query("SELECT * from tickets WHERE queue_id='$queue[id]' and ticket_isclosed = false");
@@ -83,8 +83,8 @@ class index extends core
 			$row = [
 						"<img width='30px' height='30px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
 						$ticket['id'],
-						$this->getCompanyByID($ticket['company_id']),
 						"<a $popover href='/ticket/$ticket[id]/'>$ticket[ticket_title]</a>",
+						$this->getCompanyByID($ticket['company_id']),
 						$ticket['ticket_status'],
 						$this->fbTime($ticket['ticket_lastupdated']),
 						($ticket['ticket_assigned']) ? "<a class='get' href='/selfassign/$ticket[id]/'> ". $this->getUserByID($ticket['ticket_assigned']) . "</a>" : "<a class='get' href='/selfassign/$ticket[id]/'>Unassigned</a>",
