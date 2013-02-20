@@ -131,7 +131,7 @@ If you have any questions please feel free to email $defaultEmail");
 	public function listClients()
 	{
 		// Subscription, 3 Months ago, 2 months ago, this month, total
-		$headers = ["Logo", "Client", "VIP", "Tickets"];
+		$headers = [null, "Client", "VIP", "Tickets"];
 		$month3 = date("F", strtotime("-2 Months")); // Don't hate.
 		$month2 = date("F", strtotime("-1 Months")); // I know this is dumb.
 		$thisMonth = date("F");

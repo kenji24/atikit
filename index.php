@@ -70,7 +70,7 @@ class index extends core
 	
 	private function getProviderQueueTickets(&$queue)
 	{
-		$headers = ['#', 'Client', 'Subject', 'Status', 'Updated', 'Assigned'];
+		$headers = [null, '#', 'Client', 'Subject', 'Status', 'Updated', 'Assigned'];
 		if ($this->canSeeBilling())
 			$headers[] = 'Quoted/Billed';
 		$tickets = $this->query("SELECT * from tickets WHERE queue_id='$queue[id]' and ticket_isclosed = false");
@@ -81,6 +81,7 @@ class index extends core
 			$color = ($ticket['ticket_status'] == 'Waiting for Admin') ? "blue" : null;	
 			$popover = base::popover($ticket['ticket_title'], $this->chop($ticket['ticket_body'], 150). $well, 'right');
 			$row = [
+						"<img width='20px' height='20px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
 						$ticket['id'],
 						$this->getCompanyByID($ticket['company_id']),
 						"<a $popover href='/ticket/$ticket[id]/'>$ticket[ticket_title]</a>",
