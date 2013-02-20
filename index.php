@@ -81,7 +81,7 @@ class index extends core
 			$color = ($ticket['ticket_status'] == 'Waiting for Admin') ? "blue" : null;	
 			$popover = base::popover($ticket['ticket_title'], $this->chop($ticket['ticket_body'], 150). $well, 'right');
 			$row = [
-						"<img width='40px' height='40px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
+						"<img width='30px' height='30px' src='/".$this->getProfilePicFromCID($ticket['company_id'])."'>",
 						$ticket['id'],
 						$this->getCompanyByID($ticket['company_id']),
 						"<a $popover href='/ticket/$ticket[id]/'>$ticket[ticket_title]</a>",
