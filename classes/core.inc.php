@@ -484,6 +484,13 @@ reply to this email to post any updates to the ticket.");
 		
 	}
 
+	public function getProfilePicFromCID($cid)
+	{
+		$uid = $this->returnFieldFromTable("id", "users", "company_id='$cid'");
+		return $this->getProfilePic($uid);
+		
+	}
+	
 	private function getMyProfile()
 	{
 		$pre = "<p>Your profile is used to determine how you get updates to your tickets, billing notifications as well as your picture that is shown for your ticket updates.</p>";

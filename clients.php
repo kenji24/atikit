@@ -131,7 +131,7 @@ If you have any questions please feel free to email $defaultEmail");
 	public function listClients()
 	{
 		// Subscription, 3 Months ago, 2 months ago, this month, total
-		$headers = ["Client", "VIP", "Tickets"];
+		$headers = ["Logo", "Client", "VIP", "Tickets"];
 		$month3 = date("F", strtotime("-2 Months")); // Don't hate.
 		$month2 = date("F", strtotime("-1 Months")); // I know this is dumb.
 		$thisMonth = date("F");
@@ -150,7 +150,7 @@ If you have any questions please feel free to email $defaultEmail");
 			foreach ($ticks AS $tick)
 				$tcontent .= "<a href='/ticket/$tick[id]/'>$tick[ticket_title]</a><br/>";
 			$ticketblock = base::popover("Ticket History", $tcontent, 'right');
-			$row = ["<a href='/client/$company[id]/'>$company[company_name]</a>",
+			$row = ["<img width='20px' height='20px' src='/".$this->getProfilePicFromCID($company['id'])."'>", "<a href='/client/$company[id]/'>$company[company_name]</a>",
 					($company['company_vip']) ? "Yes" : "No",
 					"<a href='#' $ticketblock>".$this->returnCountFromTable("tickets", "company_id='$company[id]'")."</a>"
 
@@ -180,7 +180,7 @@ If you have any questions please feel free to email $defaultEmail");
 			$rows[] = $row;
 		}
 		if ($this->canSeeBilling())
-			$rows[] = [null, null, null, "<span class='pull-right'><b>Totals:</b></span>",
+			$rows[] = [null, null, null, null, "<span class='pull-right'><b>Totals:</b></span>",
 				"$". number_format($totals[2],2),
 				"$". number_format($totals[1],2),
 				"$". number_format($totals[0],2),
