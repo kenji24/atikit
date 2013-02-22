@@ -69,7 +69,7 @@ class poll extends core
 
 		$this->updateTicket(['ticket_id' => $id,
 							 'internal' => false,
-							 'ticket_body' => $body,
+							 'ticket_body' => addslashes($body),
 							 'ticket_status' => "Waiting for Admin",
 							 'cid' => $cid,
 							 'uid' => $uid]);
@@ -92,7 +92,7 @@ class poll extends core
 		if (!$id)
 			$this->createTicket(['queue_id' => $queue,
 					'ticket_title' => $subject,
-					'ticket_body' => $body,
+					'ticket_body' => addslashes($body),
 					'company_id' => $cid,
 					'ticket_body' => $body
 					]);
