@@ -91,10 +91,9 @@ class poll extends core
 		$id = $this->getTicketNumber($subject);
 		if (!$id)
 			$this->createTicket(['queue_id' => $queue,
-					'ticket_title' => $subject,
+					'ticket_title' => addslashes($subject),
 					'ticket_body' => addslashes($body),
 					'company_id' => $cid,
-					'ticket_body' => $body
 					]);
 		else
 			$this->update($id, $uid, $body);
