@@ -39,7 +39,7 @@ class accept extends core
 		$ticket = $this->query("SELECT id,company_id FROM tickets WHERE id='$sow[ticket_id]'")[0];
 		$uid = $this->returnFieldFromTable("id", "users", "company_id='$ticket[company_id]'");
 		$now = time();
-		$this->query("UPDATE sows SET sow_accepted = true, sow_acceptuid='$uid', sow_acceptts='$now'");
+		$this->query("UPDATE sows SET sow_accepted = true, sow_acceptuid='$uid', sow_acceptts='$now' WHERE id='$sow[id]'");
 		$this->export(base::subHeader("Statement Accepted", "Your statement has been accepted."));
 		$this->export(base::pageHeader("Statement Accepted", "The statement has been accepted and is ready for work to begin."));
 		$this->notifyProvider("Statement Accepted", $this->getUserByID($uid). " accepted the Statement of Work for Ticket #{$ticket['id']} and is ready for work to be completed.", "/ticket/$ticket[id]/");
