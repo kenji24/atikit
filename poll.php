@@ -132,7 +132,7 @@ class poll extends core
 		foreach ($queues AS $queue)
 			$mailboxes[] = [		
 					'label'     => $queue['queue_name'],
-					'mailbox'   => "{".$queue['queue_host'].":993/imap/ssl}INBOX",
+					'mailbox'   => "{".$queue['queue_host'].":993/novalidate-cert/imap/ssl}INBOX",
 					'username'  => $queue['queue_email'],
 					'password'  => $queue['queue_password'],
 					'queue' => $queue['id']
