@@ -1084,7 +1084,7 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		$items = $this->decode($sow['sow_meta']);
 		unset($items[$index]);
 		$items = $this->encode($items);
-		$this->query("UPDATE sows SET sow_meta='$items', sow_accepted = false, sow_sent = false, sow_updated='{$now}', sow_updatedby='{$this->user->id}'");
+		$this->query("UPDATE sows SET sow_meta='$items', sow_accepted = false, sow_sent = false, sow_updated='{$now}', sow_updatedby='{$this->user->id}' WHERE id='$sid'");
 		$json = [];
 		$json['action'] = 'reload';
 		$json['url'] = "/ticket/$sow[ticket_id]/";
