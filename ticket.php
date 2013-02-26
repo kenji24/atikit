@@ -1067,7 +1067,7 @@ class ticket extends core
 		$url = $this->getSetting('atikit_url');
 
 		$loc = $this->createPDFSOW($sow);
-		$this->mailCompany($ticket['company_id'], "Statement of Work Created/Updated", "A new statement of work has been created or updated for ticket #{$tid} ($ticket[ticket_title]). The statement has been attached in
+		$this->mailCompany($ticket['company_id'], "[#$tid] A Statement of Work has been Created/Updated", "A new statement of work has been created or updated for ticket #{$tid} ($ticket[ticket_title]). The statement has been attached in
 this email. If you wish to approve this statement and begin work, click the link below.
 
 $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
