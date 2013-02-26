@@ -84,8 +84,15 @@ class ticket extends core
 		$headers = ['Description', 'Type', 'From', 'When'];
 		$rows = [];
 		foreach ($files AS $file)
-			$rows[] = ["<a href='/$file[file_loc]'>$file[file_title]</a> <a style='padding-left:10px;' class='get' data-title='E-mailing File' rel='tooltip' title='Email File' href='/email/file/$file[id]/'><i class='icon-envelope-alt'></i></a>", $file['file_type'], $this->getUserByID($file['user_id']), $this->fbTime($file['file_ts'])];
-
+		{
+			$env = null;
+			if ($this->isProvidingCompany())
+			{
+				$color = ($file['file_sent']) ? "green" : "red";
+				$env = "<a style='padding-left:10px; color:{$color}' class='get' data-title='E-mailing File' rel='tooltip' title='Email File' href='/email/file/$file[id]/'><i class='icon-envelope-alt'></i></a>";
+			}
+			$rows[] = ["<a href='/$file[file_loc]'>$file[file_title]</a>  {$env}", $file['file_type'], $this->getUserByID($file['user_id']), $this->fbTime($file['file_ts'])];
+		}
 		$table = table::init()->headers($headers)->rows($rows)->render();
 		return widget::init()->icon('download')->header('Ticket Attachments')->content($table)->isTable()->render();
 	}
@@ -1204,11 +1211,12 @@ $url" . "/accept/$hash/", $ticket['queue_id'], $loc );
 		if (!$this->isMyTicket($ticket))
 			$this->failJson("Access Denied", "This is not your file!");
 		$this->mailCompany($ticket['company_id'], "[#$ticket[id]] Attachment Sent: $file[file_title]", "Please find the following attachment: $file[file_title]", $ticket['queue_id'], $file['file_loc']);
+		$this->query("UPDATE files SET file_sent = TRUE where id='$id'");
 		$json = [];
 		$json['gtitle'] = "File E-mailed";
 		$json['gbody'] = "File emailed to email address on file.";
 		$json['action'] = 'reassignsource';
-		$json['elementval'] = "<i class='icon-share'></i>";
+		$json['elementval'] = "<i class='icon-share' style='color:green'></i>";
 		$this->jsone('success', $json);
 	}
 
