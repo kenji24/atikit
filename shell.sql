@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.30, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.29, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: shell
 -- ------------------------------------------------------
--- Server version	5.5.30-1~dotdeb.0
+-- Server version	5.5.29-0ubuntu0.12.10.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -70,6 +70,7 @@ CREATE TABLE `files` (
   `user_id` int(11) DEFAULT NULL,
   `file_type` varchar(50) DEFAULT NULL,
   `file_ts` bigint(20) DEFAULT NULL,
+  `file_sent` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -477,4 +478,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-17 19:13:46
+-- Dump completed on 2013-02-26  0:18:14
