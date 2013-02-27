@@ -34,6 +34,7 @@ class notify extends core
 		if (!$this->user) return null;		
 		// First thing do some maint. 
 		$now = time();
+		$this->query("UPDATE users SET user_lastupdated=CURRENT_TIMESTAMP WHERE id='{$this->user->id}'");
 		$target = $now - $target;  // So now - 5 days.. anything that's lower than that kill it.
 		$this->query("DELETE from notifications WHERE notification_ts < $target AND notification_active = TRUE");
 		$notifications = $this->query("SELECT * from notifications WHERE user_id='{$this->user->id}' ORDER by notification_ts DESC LIMIT 6");

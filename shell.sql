@@ -1,28 +1,32 @@
--- MySQL dump 10.13  Distrib 5.5.29, for debian-linux-gnu (x86_64)
+-- phpMyAdmin SQL Dump
+-- version 3.5.2.2
+-- http://www.phpmyadmin.net
 --
--- Host: localhost    Database: shell
--- ------------------------------------------------------
--- Server version	5.5.29-0ubuntu0.12.10.1
+-- Host: 127.0.0.1
+-- Generation Time: Feb 27, 2013 at 03:08 AM
+-- Server version: 5.5.27
+-- PHP Version: 5.4.7
+
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Database: `atikit`
+--
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `companies`
 --
 
-DROP TABLE IF EXISTS `companies`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `companies` (
+CREATE TABLE IF NOT EXISTS `companies` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_name` varchar(50) DEFAULT NULL,
   `company_address` varchar(100) DEFAULT NULL,
@@ -43,26 +47,22 @@ CREATE TABLE `companies` (
   `company_planbegin` bigint(20) DEFAULT NULL,
   `company_planend` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `companies`
 --
 
-LOCK TABLES `companies` WRITE;
-/*!40000 ALTER TABLE `companies` DISABLE KEYS */;
-/*!40000 ALTER TABLE `companies` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `companies` (`id`, `company_name`, `company_address`, `company_address2`, `company_city`, `company_state`, `company_zip`, `company_admin`, `company_isprovider`, `company_notes`, `company_stripetoken`, `company_dwollatoken`, `company_stripeid`, `company_plan`, `company_phone`, `company_vip`, `company_since`, `company_planbegin`, `company_planend`) VALUES
+(1, 'test', 'test', 'test', 'test', 'te', '9000', 1, 1, NULL, NULL, NULL, NULL, 0, '', 0, 1361869952, NULL, NULL);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `files`
 --
 
-DROP TABLE IF EXISTS `files`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `files` (
+CREATE TABLE IF NOT EXISTS `files` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `file_loc` varchar(75) DEFAULT NULL,
   `file_title` varchar(75) DEFAULT NULL,
@@ -72,50 +72,35 @@ CREATE TABLE `files` (
   `file_ts` bigint(20) DEFAULT NULL,
   `file_sent` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `files`
---
-
-LOCK TABLES `files` WRITE;
-/*!40000 ALTER TABLE `files` DISABLE KEYS */;
-/*!40000 ALTER TABLE `files` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `levels`
 --
 
-DROP TABLE IF EXISTS `levels`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `levels` (
+CREATE TABLE IF NOT EXISTS `levels` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `level_name` varchar(30) DEFAULT NULL,
   `level_isbilling` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `levels`
 --
 
-LOCK TABLES `levels` WRITE;
-/*!40000 ALTER TABLE `levels` DISABLE KEYS */;
-/*!40000 ALTER TABLE `levels` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `levels` (`id`, `level_name`, `level_isbilling`) VALUES
+(1, 'level1', 1);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `notifications`
 --
 
-DROP TABLE IF EXISTS `notifications`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notifications` (
+CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `notification_ts` bigint(20) DEFAULT NULL,
@@ -129,26 +114,15 @@ CREATE TABLE `notifications` (
   `notification_popped` tinyint(1) DEFAULT '0',
   `notification_viewed` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `notifications`
---
-
-LOCK TABLES `notifications` WRITE;
-/*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
-/*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `plans`
 --
 
-DROP TABLE IF EXISTS `plans`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `plans` (
+CREATE TABLE IF NOT EXISTS `plans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `plan_id` varchar(50) DEFAULT NULL,
   `plan_name` varchar(50) DEFAULT NULL,
@@ -156,48 +130,26 @@ CREATE TABLE `plans` (
   `plan_interval` int(11) DEFAULT NULL,
   `plan_trial` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `plans`
---
-
-LOCK TABLES `plans` WRITE;
-/*!40000 ALTER TABLE `plans` DISABLE KEYS */;
-/*!40000 ALTER TABLE `plans` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `projects`
 --
 
-DROP TABLE IF EXISTS `projects`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `projects` (
+CREATE TABLE IF NOT EXISTS `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `projects`
---
-
-LOCK TABLES `projects` WRITE;
-/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `queues`
 --
 
-DROP TABLE IF EXISTS `queues`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `queues` (
+CREATE TABLE IF NOT EXISTS `queues` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `queue_name` varchar(30) DEFAULT NULL,
   `queue_levels` varchar(50) DEFAULT NULL,
@@ -208,26 +160,23 @@ CREATE TABLE `queues` (
   `queue_islocked` tinyint(1) DEFAULT '1',
   `queue_icon` varchar(15) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `queues`
 --
 
-LOCK TABLES `queues` WRITE;
-/*!40000 ALTER TABLE `queues` DISABLE KEYS */;
-/*!40000 ALTER TABLE `queues` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `queues` (`id`, `queue_name`, `queue_levels`, `queue_email`, `queue_host`, `queue_password`, `queue_lastmessage`, `queue_islocked`, `queue_icon`) VALUES
+(1, 'q1', '1', 'kenjimagto@gmail.com', 'test.local', 'ioioio', NULL, 1, 'ioioio'),
+(2, 'q2', '1', 'info@test.local', 'test.local', 'ioioio', NULL, 1, 'ioioio');
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `replies`
 --
 
-DROP TABLE IF EXISTS `replies`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `replies` (
+CREATE TABLE IF NOT EXISTS `replies` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ticket_id` int(11) DEFAULT NULL,
   `reply_ts` bigint(20) DEFAULT NULL,
@@ -236,26 +185,15 @@ CREATE TABLE `replies` (
   `company_id` int(11) DEFAULT NULL,
   `reply_isinternal` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `replies`
---
-
-LOCK TABLES `replies` WRITE;
-/*!40000 ALTER TABLE `replies` DISABLE KEYS */;
-/*!40000 ALTER TABLE `replies` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `settings`
 --
 
-DROP TABLE IF EXISTS `settings`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `settings` (
+CREATE TABLE IF NOT EXISTS `settings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `setting_var` varchar(100) DEFAULT NULL,
   `setting_val` varchar(1024) DEFAULT NULL,
@@ -266,27 +204,36 @@ CREATE TABLE `settings` (
   `setting_span` int(11) DEFAULT '3',
   `setting_options` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 --
 -- Dumping data for table `settings`
 --
 
-LOCK TABLES `settings` WRITE;
-/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
-INSERT INTO `settings` VALUES (1,'stripe_publish','','Stripe Publishable Key','This key is shown as the publishable key from your stripe account','input','Stripe',3,NULL),(2,'stripe_private','','Stripe Private Key','This key is shown as the PRIVATE key from your stripe account','input','Stripe',3,NULL),(3,'mycompany','','Your Company Name','This will be shown on invoices, etc.','input','General',3,NULL),(4,'defaultEmail','','Default E-mail Address:','Use an info address, or support, etc.','input','General',3,NULL),(5,'defaultName','','Default E-mail Name:','Your Company Name, Support, Info, Etc.','input','General',3,NULL),(6,'company_logo','','Company Logo for Invoices','This logo should be around 250x250 px','input','General',3,NULL),(7,'atikit_url','','aTikit URL','What is the default URL for aTikit. (ie. http://www.support.yourcompany.com/','input','General',3,NULL),(9,'dwolla_app_key','','Dwolla Application Key','Your Application Key from Dwolla','input','Dwolla',4,NULL),(10,'dwolla_app_secret','','Dwolla Application Secret','Your Application Secret from Dwolla','input','Dwolla',4,NULL),(11,'dwolla_id','','Dwolla Account ID','The ID of your Dwolla Account to receive money.','input','Dwolla',2,NULL),(12,'signature','','Default Signature','Default signature for outgoing emails from aTikit','textarea','General',3,NULL),(13,'vitelity_user','','Vitelity API Username','Your Vitelity API Username','input','Vitelity',3,NULL),(14,'vitelity_password','','Vitelity API Password','Your Vitelity API Password','password','Vitelity',3,NULL),(15,'vitelity_sms','','Vitelity SMS Number','Your SMS Enabled DID (1-xxx-xxx-xxxx)','input','Vitelity',3,NULL),(16,'notify_sms','','Numbers to SMS (separated by commas)','List all numbers for VIP texts (1-xxx-xxx-xxxx)','input','General',3,NULL);
-/*!40000 ALTER TABLE `settings` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `settings` (`id`, `setting_var`, `setting_val`, `setting_desc`, `setting_help`, `setting_type`, `setting_cat`, `setting_span`, `setting_options`) VALUES
+(1, 'stripe_publish', '', 'Stripe Publishable Key', 'This key is shown as the publishable key from your stripe account', 'input', 'Stripe', 3, NULL),
+(2, 'stripe_private', '', 'Stripe Private Key', 'This key is shown as the PRIVATE key from your stripe account', 'input', 'Stripe', 3, NULL),
+(3, 'mycompany', '', 'Your Company Name', 'This will be shown on invoices, etc.', 'input', 'General', 3, NULL),
+(4, 'defaultEmail', '', 'Default E-mail Address:', 'Use an info address, or support, etc.', 'input', 'General', 3, NULL),
+(5, 'defaultName', '', 'Default E-mail Name:', 'Your Company Name, Support, Info, Etc.', 'input', 'General', 3, NULL),
+(6, 'company_logo', '', 'Company Logo for Invoices', 'This logo should be around 250x250 px', 'input', 'General', 3, NULL),
+(7, 'atikit_url', '', 'aTikit URL', 'What is the default URL for aTikit. (ie. http://www.support.yourcompany.com/', 'input', 'General', 3, NULL),
+(9, 'dwolla_app_key', '', 'Dwolla Application Key', 'Your Application Key from Dwolla', 'input', 'Dwolla', 4, NULL),
+(10, 'dwolla_app_secret', '', 'Dwolla Application Secret', 'Your Application Secret from Dwolla', 'input', 'Dwolla', 4, NULL),
+(11, 'dwolla_id', '', 'Dwolla Account ID', 'The ID of your Dwolla Account to receive money.', 'input', 'Dwolla', 2, NULL),
+(12, 'signature', '', 'Default Signature', 'Default signature for outgoing emails from aTikit', 'textarea', 'General', 3, NULL),
+(13, 'vitelity_user', '', 'Vitelity API Username', 'Your Vitelity API Username', 'input', 'Vitelity', 3, NULL),
+(14, 'vitelity_password', '', 'Vitelity API Password', 'Your Vitelity API Password', 'password', 'Vitelity', 3, NULL),
+(15, 'vitelity_sms', '', 'Vitelity SMS Number', 'Your SMS Enabled DID (1-xxx-xxx-xxxx)', 'input', 'Vitelity', 3, NULL),
+(16, 'notify_sms', '', 'Numbers to SMS (separated by commas)', 'List all numbers for VIP texts (1-xxx-xxx-xxxx)', 'input', 'General', 3, NULL);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `sows`
 --
 
-DROP TABLE IF EXISTS `sows`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `sows` (
+CREATE TABLE IF NOT EXISTS `sows` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ticket_id` int(11) DEFAULT NULL,
   `sow_title` varchar(50) DEFAULT NULL,
@@ -300,26 +247,15 @@ CREATE TABLE `sows` (
   `sow_hash` varchar(100) DEFAULT NULL,
   `sow_loc` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `sows`
---
-
-LOCK TABLES `sows` WRITE;
-/*!40000 ALTER TABLE `sows` DISABLE KEYS */;
-/*!40000 ALTER TABLE `sows` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `subtickets`
 --
 
-DROP TABLE IF EXISTS `subtickets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `subtickets` (
+CREATE TABLE IF NOT EXISTS `subtickets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ticket_id` int(11) DEFAULT NULL,
   `subticket_title` varchar(100) DEFAULT NULL,
@@ -333,26 +269,15 @@ CREATE TABLE `subtickets` (
   `subticket_standingperc` int(11) DEFAULT NULL,
   `subticket_creator` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `subtickets`
---
-
-LOCK TABLES `subtickets` WRITE;
-/*!40000 ALTER TABLE `subtickets` DISABLE KEYS */;
-/*!40000 ALTER TABLE `subtickets` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `tickets`
 --
 
-DROP TABLE IF EXISTS `tickets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tickets` (
+CREATE TABLE IF NOT EXISTS `tickets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `queue_id` int(11) NOT NULL,
   `ticket_title` varchar(100) DEFAULT NULL,
@@ -367,26 +292,23 @@ CREATE TABLE `tickets` (
   `ticket_standinguid` int(11) DEFAULT NULL,
   `ticket_standingts` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
 -- Dumping data for table `tickets`
 --
 
-LOCK TABLES `tickets` WRITE;
-/*!40000 ALTER TABLE `tickets` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tickets` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `tickets` (`id`, `queue_id`, `ticket_title`, `ticket_body`, `ticket_isclosed`, `ticket_status`, `ticket_opents`, `ticket_lastupdated`, `company_id`, `ticket_assigned`, `ticket_standing`, `ticket_standinguid`, `ticket_standingts`) VALUES
+(1, 1, 'te', 'te', 0, 'New', 1361873676, 1361873676, 1, NULL, NULL, NULL, NULL),
+(2, 2, 'rtytrytry', 'rtytrytrytry', 0, 'New', 1361873703, 1361873703, 1, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `transactions`
 --
 
-DROP TABLE IF EXISTS `transactions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `transactions` (
+CREATE TABLE IF NOT EXISTS `transactions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `transaction_merchant_id` varchar(50) DEFAULT NULL,
   `transaction_ts` bigint(20) DEFAULT NULL,
@@ -398,51 +320,29 @@ CREATE TABLE `transactions` (
   `ticket_id` int(11) DEFAULT NULL,
   `company_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `transactions`
---
-
-LOCK TABLES `transactions` WRITE;
-/*!40000 ALTER TABLE `transactions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transactions` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `transfers`
 --
 
-DROP TABLE IF EXISTS `transfers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `transfers` (
+CREATE TABLE IF NOT EXISTS `transfers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `transfer_amt` double DEFAULT NULL,
   `transfer_ts` bigint(20) DEFAULT NULL,
   `transfer_source` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `transfers`
---
-
-LOCK TABLES `transfers` WRITE;
-/*!40000 ALTER TABLE `transfers` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transfers` ENABLE KEYS */;
-UNLOCK TABLES;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_name` varchar(50) DEFAULT NULL,
   `company_id` int(11) NOT NULL,
@@ -456,26 +356,17 @@ CREATE TABLE `users` (
   `user_pic` varchar(75) DEFAULT NULL,
   `user_sms` varchar(20) DEFAULT NULL,
   `user_cansms` tinyint(1) DEFAULT '0',
+  `user_lastupdated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `users`
 --
 
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `users` (`id`, `user_name`, `company_id`, `user_email`, `user_phone`, `user_title`, `user_password`, `level_id`, `user_isadmin`, `user_altemails`, `user_pic`, `user_sms`, `user_cansms`, `user_lastupdated`) VALUES
+(1, 'admin', 1, 'kenjimagto@gmail.com', '', 'test', 'e10adc3949ba59abbe56e057f20f883e', NULL, 1, NULL, NULL, NULL, 0, '2013-02-26 13:53:01');
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2013-02-26  0:18:14

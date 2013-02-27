@@ -228,13 +228,13 @@ class admin extends core
 		$nav = base::span(4, $this->adminNav('users'));
 		$pcid = $this->returnFieldFromTable("id", "companies", "company_isprovider = true");
 		$users = $this->query("SELECT * from users where company_id='$pcid'");
-		$headers = ['Name', 'Title', 'E-mail', 'Access Level', 'Delete'];
+		$headers = ['Name', 'Title', 'E-mail', 'Access Level', 'Last Login', 'Delete'];
 		$rows = [];
 		foreach ($users AS $user)
 			$rows[] = ["<a class='mjax' data-target='#editUser' href='/admin/user/$user[id]/'>$user[user_name]</a>",
 			$user['user_title'],
 			$user['user_email'],
-			$this->getLevelById($user['level_id']),
+			$this->getLevelById($user['level_id']),$this->fbTime(strtotime($user['user_lastupdated'])),
 			"<a class='get' href='/admin/user/delete/$user[id]/'><i class='icon-remove'></i></a>"];
 
 			$table = table::init()->headers($headers)->rows($rows)->render();
@@ -369,10 +369,11 @@ class admin extends core
 		{
 			$nav = base::span(4, $this->adminNav('queues'));
 			$queues = $this->query("SELECT * from queues");
-			$headers = ['Queue', 'E-mail', 'Access Lists', 'Last Message', 'Delete'];
+			$headers = ['Tickets', 'Queue', 'E-mail', 'Access Lists', 'Last Message', 'Delete'];
 			$rows = [];
 			foreach ($queues AS $queue)
-				$rows[] = ["<a class='mjax' data-target='#editQueue' href='/admin/queue/$queue[id]/'>$queue[queue_name]</a>",
+				$rows[] = [$this->returnCountFromTable("tickets", "queue_id='$queue[id]'"),
+				"<a class='mjax' data-target='#editQueue' href='/admin/queue/$queue[id]/'>$queue[queue_name]</a>",
 				$queue['queue_email'],
 				$this->getLevelsForQueue($queue),
 				$queue['queue_lastmessage'],
